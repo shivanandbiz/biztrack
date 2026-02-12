@@ -6,15 +6,18 @@ from frappe.utils import flt, time_diff_in_seconds, get_datetime
 import json
 
 @frappe.whitelist()
-def get_activity_summary(from_date=None, to_date=None, employee=None):
+def get_activity_summary(date=None, employee=None):
     """Get activity summary data for dashboard"""
     
     conditions = "1=1"
     
-    if from_date:
-        conditions += f" AND DATE(creation) >= '{from_date}'"
-    if to_date:
-        conditions += f" AND DATE(creation) <= '{to_date}'"
+    if date:
+        conditions += f" AND DATE(creation) = '{date}'"
+    else:
+        # If no date provided, use today
+        today = frappe.utils.today()
+        conditions += f" AND DATE(creation) = '{today}'"
+    
     if employee:
         conditions += f" AND employee = '{employee}'"
     
@@ -59,7 +62,7 @@ def get_activity_summary(from_date=None, to_date=None, employee=None):
         LIMIT 10
     """, as_dict=True)
     
-    # Daily Activity Timeline
+    # Daily Activity Timeline (for the selected date, show hourly breakdown)
     daily_activity = frappe.db.sql(f"""
         SELECT 
             DATE(creation) as date,
@@ -111,6 +114,7 @@ def get_real_time_activity(employee=None):
             event_name,
             event_id,
             window_title,
+            category,
             to_date,
             duration,
             idle_duration,
