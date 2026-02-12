@@ -65,78 +65,124 @@ class ActivityDashboard {
                 </div>
             </div>
 
-            <!-- Summary Cards -->
-            <div class="row dashboard-summary">
-                <div class="col-md-3">
-                    <div class="summary-card">
-                        <h4>Total Time</h4>
-                        <div class="summary-value" id="total_time">0h 0m</div>
+            <!-- Tab Navigation -->
+            <div class="row" style="margin-top: 20px;">
+                <div class="col-md-12">
+                    <ul class="nav nav-tabs" id="dashboard-tabs">
+                        <li class="active"><a data-tab="summary">Summary</a></li>
+                        <li><a data-tab="window">Window</a></li>
+                        <li><a data-tab="browser">Browser</a></li>
+                        <!-- <li><a data-tab="editor">Editor</a></li> -->
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Tab Content: Summary -->
+            <div id="tab-summary" class="tab-content active" style="margin-top: 20px;">
+                <!-- Summary Cards -->
+                <div class="row dashboard-summary">
+                    <div class="col-md-3">
+                        <div class="summary-card">
+                            <h4>Total Time</h4>
+                            <div class="summary-value" id="total_time">0h 0m</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="summary-card">
+                            <h4>Active Sessions</h4>
+                            <div class="summary-value" id="active_sessions">0</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="summary-card">
+                            <h4>Applications Used</h4>
+                            <div class="summary-value" id="unique_apps">0</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="summary-card">
+                            <h4>Average Session</h4>
+                            <div class="summary-value" id="avg_session">0m</div>
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="summary-card">
-                        <h4>Active Sessions</h4>
-                        <div class="summary-value" id="active_sessions">0</div>
+
+                <!-- Hourly Chart -->
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="dashboard-section">
+                            <h3>Hourly Activity</h3>
+                            <div id="timeline_chart" style="height: 350px;"></div>
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="summary-card">
-                        <h4>Applications Used</h4>
-                        <div class="summary-value" id="unique_apps">0</div>
+
+                <!-- Main Dashboard Sections -->
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="dashboard-section">
+                            <h3>Top Applications</h3>
+                            <div id="top_applications_chart"></div>
+                            <div id="top_applications_list"></div>
+                        </div>
                     </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="summary-card">
-                        <h4>Average Session</h4>
-                        <div class="summary-value" id="avg_session">0m</div>
+
+                    <div class="col-md-4">
+                        <div class="dashboard-section">
+                            <h3>Category Distribution</h3>
+                            <ul class="nav nav-tabs" id="category-tabs" style="margin-bottom: 15px; border-bottom: none;">
+                                <li class="active"><a data-tab="cat-list" style="padding: 5px 10px; font-size: 12px;">List</a></li>
+                                <li><a data-tab="cat-sunburst" style="padding: 5px 10px; font-size: 12px;">Sunburst</a></li>
+                            </ul>
+                            
+                            <div id="cat-list-view">
+                                <div id="category_list"></div>
+                            </div>
+                            
+                            <div id="cat-sunburst-view" style="display: none; text-align: center;">
+                                <div id="category_sunburst"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="dashboard-section">
+                            <h3>Employee Activity</h3>
+                            <div id="employee_chart"></div>
+                            <div id="employee_list"></div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Main Dashboard Sections -->
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="dashboard-section">
-                        <h3>Top Applications</h3>
-                        <div id="top_applications_chart"></div>
-                        <div id="top_applications_list"></div>
-                    </div>
-                </div>
-
-                <div class="col-md-4">
-                    <div class="dashboard-section">
-                        <h3>Top Categories</h3>
-                        <div id="category_chart"></div>
-                        <div id="category_list"></div>
-                    </div>
-                </div>
-
-                <div class="col-md-4">
-                    <div class="dashboard-section">
-                        <h3>Employee Activity</h3>
-                        <div id="employee_chart"></div>
-                        <div id="employee_list"></div>
+            <!-- Tab Content: Window -->
+            <div id="tab-window" class="tab-content" style="margin-top: 20px; display: none;">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="dashboard-section">
+                            <h3>Window Titles</h3>
+                            <div id="window_titles_list"></div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="row">
-                <div class="col-md-8">
-                    <div class="dashboard-section">
-                        <h3>Daily Activity Timeline</h3>
-                        <div id="timeline_chart" style="height: 400px;"></div>
-                    </div>
-                </div>
-
-                <div class="col-md-4">
-                    <div class="dashboard-section">
-                        <h3>Window Titles</h3>
-                        <div id="window_titles_list"></div>
+            <!-- Tab Content: Browser -->
+            <div id="tab-browser" class="tab-content" style="margin-top: 20px; display: none;">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="dashboard-section">
+                            <h3>Top Browser Domains</h3>
+                            <div id="browser_domains_list">
+                                <div class="text-center text-muted p-20">No browser data available</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="row">
+            <!-- Common Section: Real-time Activity (Visible in all tabs) -->
+            <div class="row" style="margin-top: 20px;">
                 <div class="col-md-12">
                     <div class="dashboard-section">
                         <h3>Real-time Activity</h3>
@@ -164,6 +210,19 @@ class ActivityDashboard {
 
         // Bind employee change event
         $('#employee').on('change', () => this.load_dashboard_data());
+
+        // Bind tab switching
+        $('#dashboard-tabs a').on('click', (e) => {
+            const tab = $(e.currentTarget).data('tab');
+
+            // Update active tab styling
+            $('#dashboard-tabs li').removeClass('active');
+            $(e.currentTarget).parent().addClass('active');
+
+            // Show/hide tab content
+            $('.tab-content').hide();
+            $(`#tab-${tab}`).show();
+        });
     }
 
 
@@ -236,6 +295,50 @@ class ActivityDashboard {
             }
         });
 
+        // Fetch hourly activity for the selected date
+        frappe.call({
+            method: 'biztrack.biztrack.page.activity_dashboard.activity_dashboard.get_hourly_activity',
+            args: {
+                date: selected_date,
+                employee: employee
+            },
+            callback: (r) => {
+                if (r.message) {
+                    this.render_hourly_chart(r.message);
+                }
+            }
+        });
+
+        // Fetch browser domains for the selected date
+        frappe.call({
+            method: 'biztrack.biztrack.page.activity_dashboard.activity_dashboard.get_browser_domains',
+            args: {
+                date: selected_date,
+                employee: employee
+            },
+            callback: (r) => {
+                if (r.message) {
+                    this.render_browser_domains(r.message);
+                } else {
+                    $('#browser_domains_list').html('<div class="text-center text-muted p-20">No browser data available</div>');
+                }
+            }
+        });
+
+        // Fetch category hierarchy
+        frappe.call({
+            method: 'biztrack.biztrack.page.activity_dashboard.activity_dashboard.get_category_hierarchy',
+            args: {
+                date: selected_date,
+                employee: employee
+            },
+            callback: (r) => {
+                if (r.message) {
+                    this.render_category_sunburst(r.message);
+                }
+            }
+        });
+
         frappe.call({
             method: 'biztrack.biztrack.page.activity_dashboard.activity_dashboard.get_real_time_activity',
             args: {
@@ -253,10 +356,230 @@ class ActivityDashboard {
     render_dashboard(data) {
         this.render_summary_cards(data);
         this.render_top_applications(data.top_applications);
-        this.render_category_breakdown(data.top_categories);
+
+        // Render category visualizations (handled by sunburst method which manages tabs)
+        // We'll call render_category_list from within render_category_sunburst for initial load
+        // But we need the list data, so we'll use top_categories for now
+        this.render_category_list(data.top_categories);
+
         this.render_employee_activity(data.employee_activity);
-        this.render_timeline(data.daily_activity);
+        // this.render_employee_activity(data.employee_activity);
+        // this.render_timeline(data.daily_activity); // Replaced by hourly chart
         this.render_window_titles(data.window_titles);
+    }
+
+    render_category_list(categories) {
+        if (!categories || categories.length === 0) {
+            $('#category_list').html('<div class="text-center text-muted">No category data</div>');
+            return;
+        }
+
+        const maxTime = Math.max(...categories.map(c => c.total_time));
+
+        const html = categories.map(c => {
+            const width = (c.total_time / maxTime) * 100;
+            return `
+                <div class="progress-item" style="margin-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 2px;">
+                        <span style="font-weight: 500;">${c.category}</span>
+                        <span style="color: #666;">${this.format_time(c.total_time)}</span>
+                    </div>
+                    <div class="progress" style="height: 6px; margin-bottom: 0;">
+                        <div class="progress-bar progress-bar-info" role="progressbar" 
+                             style="width: ${width}%">
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        $('#category_list').html(html);
+    }
+
+    render_browser_domains(domains) {
+        if (!domains || domains.length === 0) {
+            $('#browser_domains_list').html('<div class="text-center text-muted p-20">No browser data available</div>');
+            return;
+        }
+
+        const html = domains.map(d => {
+            // Create page list
+            const pagesHtml = d.pages.map(p => `
+                <div style="font-size: 11px; margin-left: 32px; color: #666; border-left: 2px solid #eee; padding-left: 8px; margin-top: 2px; display: flex; justify-content: space-between;">
+                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%;" title="${p.title}">${p.title}</span>
+                    <span>${this.format_time(p.time)}</span>
+                </div>
+            `).join('');
+
+            return `
+                <div class="domain-item" style="padding: 10px; border-bottom: 1px solid #f1f1f1;">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; flex: 1;">
+                            <img src="${d.icon}" width="20" height="20" style="margin-right: 12px; border-radius: 4px;" onerror="this.src='https://www.google.com/s2/favicons?domain=example.com'">
+                            <div style="font-weight: 500; font-size: 14px; color: #2c3e50;">${d.domain}</div>
+                        </div>
+                        <div style="font-weight: bold; color: #2980b9;">${this.format_time(d.total_time)}</div>
+                    </div>
+                    <div style="margin-top: 5px;">
+                        ${pagesHtml}
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        $('#browser_domains_list').html(html);
+    }
+
+    render_category_sunburst(data) {
+        if (!data || !data.children || data.children.length === 0) {
+            $('#category_sunburst').html('<div class="text-center text-muted">No category data</div>');
+            return;
+        }
+
+        // Initialize category tabs if not already done
+        if (!$('#category-tabs').data('init')) {
+            $('#category-tabs a').on('click', (e) => {
+                const tab = $(e.currentTarget).data('tab');
+
+                // Update active tab styling
+                $('#category-tabs li').removeClass('active');
+                $(e.currentTarget).parent().addClass('active');
+
+                if (tab === 'cat-list') {
+                    $('#cat-list-view').show();
+                    $('#cat-sunburst-view').hide();
+                } else {
+                    $('#cat-list-view').hide();
+                    $('#cat-sunburst-view').show();
+                }
+            });
+            $('#category-tabs').data('init', true);
+        }
+
+        const width = 250;
+        const height = 250;
+        const radius = Math.min(width, height) / 2;
+        const colorPalette = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD'];
+
+        // Recursive function to flatten hierarchy into arcs
+        let arcs = [];
+        let totalValue = data.children.reduce((sum, c) => sum + c.value, 0);
+
+        // Simple 2-level sunburst implementation using SVG
+        // Level 1: Inner circle
+        let currentAngle = 0;
+
+        data.children.sort((a, b) => b.value - a.value).forEach((node, i) => {
+            const angle = (node.value / totalValue) * 2 * Math.PI;
+            const startAngle = currentAngle;
+            const endAngle = currentAngle + angle;
+            const color = colorPalette[i % colorPalette.length];
+
+            // Level 1 Arc (Inner)
+            arcs.push({
+                path: this.calculateArc(0, radius * 0.6, startAngle, endAngle),
+                color: color,
+                title: `${node.name}: ${this.format_time(node.value)}`
+            });
+
+            // Level 2 Arcs (Outer)
+            if (node.children && node.children.length > 0) {
+                let currentSubAngle = startAngle;
+                // Normalize sub-children values to fit parent's angle slice
+                let subTotal = node.children.reduce((sum, c) => sum + c.value, 0);
+
+                // If subTotal is 0 or mismatch, use parent value
+                if (subTotal === 0) subTotal = node.value;
+
+                node.children.forEach((subNode, j) => {
+                    // Calculate proportion relative to PARENT value
+                    const subAngle = (subNode.value / subTotal) * angle;
+
+                    const subStart = currentSubAngle;
+                    const subEnd = currentSubAngle + subAngle;
+
+                    // Lighter shade of parent color
+                    arcs.push({
+                        path: this.calculateArc(radius * 0.62, radius, subStart, subEnd),
+                        color: this.adjustColorOpacity(color, 0.7 - (j * 0.1)),
+                        title: `${subNode.name}: ${this.format_time(subNode.value)}`
+                    });
+
+                    currentSubAngle += subAngle;
+                });
+            } else {
+                // If no children, extend parent color to outer rim
+                arcs.push({
+                    path: this.calculateArc(radius * 0.62, radius, startAngle, endAngle),
+                    color: this.adjustColorOpacity(color, 0.7),
+                    title: `${node.name} (details): ${this.format_time(node.value)}`
+                });
+            }
+
+            currentAngle += angle;
+        });
+
+        const svg = `
+            <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+                <g transform="translate(${width / 2}, ${height / 2})">
+                    ${arcs.map(arc => `<path d="${arc.path}" fill="${arc.color}" stroke="white" stroke-width="1"><title>${arc.title}</title></path>`).join('')}
+                    <circle r="${radius * 0.25}" fill="white" />
+                    <text text-anchor="middle" dy="5" font-size="10" font-weight="bold" fill="#666">Total</text>
+                </g>
+            </svg>
+        `;
+
+        $('#category_sunburst').html(svg);
+    }
+
+    calculateArc(innerRadius, outerRadius, startAngle, endAngle) {
+        // SVG Arc calculation
+        const x1 = Math.cos(startAngle - Math.PI / 2) * outerRadius;
+        const y1 = Math.sin(startAngle - Math.PI / 2) * outerRadius;
+        const x2 = Math.cos(endAngle - Math.PI / 2) * outerRadius;
+        const y2 = Math.sin(endAngle - Math.PI / 2) * outerRadius;
+
+        const x3 = Math.cos(endAngle - Math.PI / 2) * innerRadius;
+        const y3 = Math.sin(endAngle - Math.PI / 2) * innerRadius;
+        const x4 = Math.cos(startAngle - Math.PI / 2) * innerRadius;
+        const y4 = Math.sin(startAngle - Math.PI / 2) * innerRadius;
+
+        const largeArc = (endAngle - startAngle) > Math.PI ? 1 : 0;
+
+        if (innerRadius === 0) {
+            // Sector
+            return [
+                'M', 0, 0,
+                'L', x1, y1,
+                'A', outerRadius, outerRadius, 0, largeArc, 1, x2, y2,
+                'Z'
+            ].join(' ');
+        } else {
+            // Annular Sector
+            return [
+                'M', x4, y4,
+                'L', x1, y1,
+                'A', outerRadius, outerRadius, 0, largeArc, 1, x2, y2,
+                'L', x3, y3,
+                'A', innerRadius, innerRadius, 0, largeArc, 0, x4, y4,
+                'Z'
+            ].join(' ');
+        }
+    }
+
+    adjustColorOpacity(hex, opacity) {
+        // Simple hex to rgba
+        let r = 0, g = 0, b = 0;
+        if (hex.length === 4) {
+            r = parseInt("0x" + hex[1] + hex[1]);
+            g = parseInt("0x" + hex[2] + hex[2]);
+            b = parseInt("0x" + hex[3] + hex[3]);
+        } else if (hex.length === 7) {
+            r = parseInt("0x" + hex[1] + hex[2]);
+            g = parseInt("0x" + hex[3] + hex[4]);
+            b = parseInt("0x" + hex[5] + hex[6]);
+        }
+        return `rgba(${r}, ${g}, ${b}, ${opacity})`;
     }
 
     render_summary_cards(data) {
@@ -325,96 +648,98 @@ class ActivityDashboard {
         $('#window_titles_list').html(html);
     }
 
-    render_timeline(daily_activity) {
-        if (!daily_activity || daily_activity.length === 0) {
-            $('#timeline_chart').html('<div class="text-center text-muted">No data available</div>');
+    render_hourly_chart(hourly_data) {
+        if (!hourly_data || hourly_data.length === 0) {
+            $('#timeline_chart').html('<div class="text-center text-muted p-20">No data available for this day</div>');
             return;
         }
 
-        // Prepare data for pie chart
-        const pieData = daily_activity.map(day => ({
-            name: frappe.datetime.str_to_user(day.date),
-            value: day.total_time,
-            sessions: day.session_count
-        }));
+        const width = 800;
+        const height = 300;
+        const margin = { top: 20, right: 20, bottom: 40, left: 60 };
+        const chartWidth = width - margin.left - margin.right;
+        const chartHeight = height - margin.top - margin.bottom;
 
-        // Generate colors for pie slices
-        const colors = [
-            '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
-            '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
-            '#F8C471', '#82E0AA', '#F1948A', '#85D4E6', '#F4D03F'
-        ];
+        // Find max duration to scale Y axis
+        const maxDuration = Math.max(...hourly_data.map(d => d.total_time), 1); // Avoid div by zero
 
-        // Create SVG
-        const width = 400;
-        const height = 250;
-        const radius = Math.min(width, height) / 2 - 40;
+        // Calculate bar width
+        const barWidth = chartWidth / 24;
+        const barPadding = 5;
+
+        // Generate bars
+        let barsHtml = '';
+        let labelsHtml = '';
+        let gridHtml = '';
+
+        // Y-axis grid lines (5 lines)
+        for (let i = 0; i <= 5; i++) {
+            const y = chartHeight - (chartHeight * (i / 5));
+            const value = (maxDuration * (i / 5));
+            const timeLabel = this.format_time(value);
+
+            gridHtml += `
+                <line x1="0" y1="${y}" x2="${chartWidth}" y2="${y}" stroke="#e0e0e0" stroke-dasharray="4" />
+                <text x="-10" y="${y + 4}" text-anchor="end" font-size="10" fill="#666">${timeLabel}</text>
+            `;
+        }
+
+        hourly_data.forEach((data, index) => {
+            const hour = data.hour;
+            const height = (data.total_time / maxDuration) * chartHeight;
+            const x = index * barWidth;
+            const y = chartHeight - height;
+
+            // Color based on intensity relative to max
+            const intensity = data.total_time / maxDuration;
+            const color = `rgba(52, 152, 219, ${0.3 + (intensity * 0.7)})`;
+
+            // Tooltip text
+            const tooltip = `Hour: ${hour}:00 - ${hour + 1}:00\nTime: ${this.format_time(data.total_time)}\nSessions: ${data.session_count}\nApps: ${data.unique_apps}`;
+
+            barsHtml += `
+                <rect class="hour-bar" 
+                      x="${x + barPadding}" 
+                      y="${y}" 
+                      width="${barWidth - (barPadding * 2)}" 
+                      height="${height}" 
+                      fill="${color}" 
+                      rx="2">
+                    <title>${tooltip}</title>
+                </rect>
+            `;
+
+            // X-axis labels (every 3 hours)
+            if (hour % 3 === 0) {
+                labelsHtml += `
+                    <text x="${x + (barWidth / 2)}" y="${chartHeight + 20}" text-anchor="middle" font-size="10" fill="#666">
+                        ${hour}:00
+                    </text>
+                `;
+            }
+        });
 
         const svg = `
-            <svg width="${width}" height="${height}" style="margin: 20px auto; display: block;">
-                <g transform="translate(${width / 2}, ${height / 2})">
-                    ${this.createPieSlices(pieData, radius, colors)}
-                </g>
-            </svg>
-            <div class="timeline-legend" style="display: flex; flex-wrap: wrap; justify-content: center; margin-top: 15px;">
-                ${this.createLegend(pieData, colors)}
+            <div style="overflow-x: auto;">
+                <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" style="display: block; margin: 0 auto;">
+                    <g transform="translate(${margin.left}, ${margin.top})">
+                        <!-- Grid and Axes -->
+                        ${gridHtml}
+                        <line x1="0" y1="${chartHeight}" x2="${chartWidth}" y2="${chartHeight}" stroke="#ccc" />
+                        <line x1="0" y1="0" x2="0" y2="${chartHeight}" stroke="#ccc" />
+                        
+                        <!-- Data -->
+                        ${barsHtml}
+                        ${labelsHtml}
+                        
+                        <!-- Axis Titles -->
+                        <text x="${chartWidth / 2}" y="${chartHeight + 35}" text-anchor="middle" font-size="12" fill="#333">Time of Day (Hour)</text>
+                    </g>
+                </svg>
             </div>
         `;
 
         $('#timeline_chart').html(svg);
-    }
-
-    createPieSlices(data, radius, colors) {
-        const total = data.reduce((sum, d) => sum + d.value, 0);
-        let currentAngle = 0;
-
-        return data.map((d, i) => {
-            const angle = (d.value / total) * 2 * Math.PI;
-            const startAngle = currentAngle;
-            const endAngle = currentAngle + angle;
-
-            // Calculate arc path
-            const x1 = Math.cos(startAngle) * radius;
-            const y1 = Math.sin(startAngle) * radius;
-            const x2 = Math.cos(endAngle) * radius;
-            const y2 = Math.sin(endAngle) * radius;
-
-            const largeArc = angle > Math.PI ? 1 : 0;
-
-            const pathData = [
-                'M', 0, 0,
-                'L', x1, y1,
-                'A', radius, radius, 0, largeArc, 1, x2, y2,
-                'Z'
-            ].join(' ');
-
-            currentAngle += angle;
-
-            const color = colors[i % colors.length];
-            const percentage = ((d.value / total) * 100).toFixed(1);
-
-            return `
-                <path d="${pathData}" 
-                      fill="${color}" 
-                      stroke="white" 
-                      stroke-width="2"
-                      style="cursor: pointer;">
-                    <title>${d.name}: ${this.format_time(d.value)} (${percentage}%) - ${d.sessions} sessions</title>
-                </path>
-            `;
-        }).join('');
-    }
-
-    createLegend(data, colors) {
-        return data.map((d, i) => {
-            const color = colors[i % colors.length];
-            return `
-                <div style="display: flex; align-items: center; margin: 5px 10px; font-size: 12px;">
-                    <div style="width: 15px; height: 15px; background-color: ${color}; margin-right: 8px; border-radius: 3px;"></div>
-                    <span style="white-space: nowrap;">${d.name} (${this.format_time(d.value)})</span>
-                </div>
-            `;
-        }).join('');
     }
 
     render_realtime_activity(activities) {
