@@ -309,3 +309,80 @@ def get_employees():
     """, as_dict=True)
     
     return employees
+
+@frappe.whitelist()
+def get_category_hierarchy(date=None, employee=None):
+    """Get hierarchical category data for tree/sunburst visualization"""
+    
+    if not date:
+        date = frappe.utils.today()
+    
+    conditions = f"DATE(creation) = '{date}'"
+    
+    if employee:
+        conditions += f" AND employee = '{employee}'"
+    
+    categories = frappe.db.sql(f"""
+        SELECT 
+            category,
+            SUM(duration) as total_time,
+            COUNT(*) as session_count,
+            GROUP_CONCAT(DISTINCT applications) as apps
+        FROM `tabApplications Tracking`
+        WHERE {conditions} AND category IS NOT NULL AND category != ''
+        GROUP BY category
+        ORDER BY total_time DESC
+    """, as_dict=True)
+    
+    # Build hierarchy (assuming categories use ">" separator like "Work > Programming")
+    # If no separator, it treats as flat hierarchy
+    hierarchy = build_category_tree(categories)
+    return hierarchy
+
+def build_category_tree(categories):
+    """Build hierarchical tree from flat category list"""
+    tree = {
+        'name': 'root',
+        'children': []
+    }
+    
+    # Helper to find or create child node
+    def get_or_create_child(parent_children, name):
+        for child in parent_children:
+            if child['name'] == name:
+                return child
+        
+        new_child = {
+            'name': name,
+            'value': 0,
+            'sessions': 0,
+            'children': []
+        }
+        parent_children.append(new_child)
+        return new_child
+
+    for cat in categories:
+        # Split category by separator (handling different potential separators)
+        if ' > ' in cat.category:
+            parts = cat.category.split(' > ')
+        elif '>' in cat.category:
+            parts = cat.category.split('>')
+        elif ' - ' in cat.category:
+            parts = cat.category.split(' - ')
+        else:
+            parts = [cat.category]
+            
+        current_children = tree['children']
+        
+        for i, part in enumerate(parts):
+            part = part.strip()
+            node = get_or_create_child(current_children, part)
+            
+            # Add values to current node (aggregating up the tree)
+            node['value'] += cat.total_time
+            node['sessions'] += cat.session_count
+            
+            # Move down to children
+            current_children = node['children']
+            
+    return tree
