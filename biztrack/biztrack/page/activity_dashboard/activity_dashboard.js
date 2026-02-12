@@ -122,7 +122,7 @@ class ActivityDashboard {
                     <div class="col-md-4">
                         <div class="dashboard-section">
                             <h3>Top Applications</h3>
-                            <div id="top_applications_chart"></div>
+                            <div id="top_applications_chart" style="height: 200px; margin-bottom: 15px;"></div>
                             <div id="top_applications_list"></div>
                         </div>
                     </div>
@@ -161,7 +161,14 @@ class ActivityDashboard {
                     <div class="col-md-12">
                         <div class="dashboard-section">
                             <h3>Window Titles</h3>
-                            <div id="window_titles_list"></div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div id="window_chart" style="height: 300px;"></div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div id="window_titles_list"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -596,6 +603,12 @@ class ActivityDashboard {
     }
 
     render_top_applications(applications) {
+        // Render Pie Chart
+        this.render_pie_chart('top_applications_chart', applications.map(app => ({
+            name: app.applications,
+            value: app.total_time
+        })), { donut: false });
+
         const colors = ['#d1f2eb', '#d6eaf8', '#e8daef', '#fdebd0', '#f5b7b1', '#d5f5e3', '#fcf3cf']; // Light shades
 
         const html = applications.map((app, index) => {
@@ -612,18 +625,6 @@ class ActivityDashboard {
         $('#top_applications_list').html(html);
     }
 
-    render_category_breakdown(categories) {
-        const html = categories.map(cat => `
-            <div class="category-item">
-                <div class="category-name">${cat.category || 'Uncategorized'}</div>
-                <div class="category-time">${this.format_time(cat.total_time)}</div>
-                <div class="category-sessions">${cat.session_count} sessions</div>
-            </div>
-        `).join('');
-
-        $('#category_list').html(html);
-    }
-
     render_employee_activity(employees) {
         const html = employees.map(emp => `
             <div class="employee-item">
@@ -637,6 +638,21 @@ class ActivityDashboard {
     }
 
     render_window_titles(titles) {
+        // Render Donut Chart for Window Titles
+        // Group small values into "Others" for chart clarity
+        let chartData = titles.map(t => ({
+            name: t.window_title,
+            value: t.total_time
+        }));
+
+        if (chartData.length > 8) {
+            const top8 = chartData.slice(0, 8);
+            const others = chartData.slice(8).reduce((sum, item) => sum + item.value, 0);
+            chartData = [...top8, { name: 'Others', value: others }];
+        }
+
+        this.render_pie_chart('window_chart', chartData, { donut: true, donutWidth: 50 });
+
         const html = titles.map(title => `
             <div class="window-item">
                 <div class="window-title">${title.window_title}</div>
@@ -646,6 +662,86 @@ class ActivityDashboard {
         `).join('');
 
         $('#window_titles_list').html(html);
+    }
+
+    render_pie_chart(containerId, data, options = {}) {
+        const container = $(`#${containerId}`);
+        if (container.length === 0 || !data || data.length === 0) return;
+
+        const width = container.width() || 300;
+        const height = container.height() || 300;
+        const radius = Math.min(width, height) / 2 - 10;
+        const donutWidth = options.donutWidth || 0;
+        const innerRadius = options.donut ? radius - donutWidth : 0;
+
+        const colors = [
+            '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
+            '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9'
+        ];
+
+        const total = data.reduce((sum, d) => sum + d.value, 0);
+        let currentAngle = 0;
+
+        const slicesHtml = data.map((d, i) => {
+            const angle = (d.value / total) * 2 * Math.PI;
+            const startAngle = currentAngle;
+            const endAngle = currentAngle + angle;
+            currentAngle += angle;
+
+            // Should skip if angle is too small
+            if (angle < 0.01) return '';
+
+            const largeArc = angle > Math.PI ? 1 : 0;
+
+            const x1 = Math.cos(startAngle - Math.PI / 2) * radius;
+            const y1 = Math.sin(startAngle - Math.PI / 2) * radius;
+            const x2 = Math.cos(endAngle - Math.PI / 2) * radius;
+            const y2 = Math.sin(endAngle - Math.PI / 2) * radius;
+
+            let path = '';
+
+            if (options.donut) {
+                const x3 = Math.cos(endAngle - Math.PI / 2) * innerRadius;
+                const y3 = Math.sin(endAngle - Math.PI / 2) * innerRadius;
+                const x4 = Math.cos(startAngle - Math.PI / 2) * innerRadius;
+                const y4 = Math.sin(startAngle - Math.PI / 2) * innerRadius;
+
+                path = [
+                    'M', x4, y4,
+                    'L', x1, y1,
+                    'A', radius, radius, 0, largeArc, 1, x2, y2,
+                    'L', x3, y3,
+                    'A', innerRadius, innerRadius, 0, largeArc, 0, x4, y4,
+                    'Z'
+                ].join(' ');
+            } else {
+                path = [
+                    'M', 0, 0,
+                    'L', x1, y1,
+                    'A', radius, radius, 0, largeArc, 1, x2, y2,
+                    'Z'
+                ].join(' ');
+            }
+
+            const color = d.name === 'Others' ? '#e0e0e0' : colors[i % colors.length];
+            const percent = ((d.value / total) * 100).toFixed(1);
+
+            return `
+                <path d="${path}" fill="${color}" stroke="white" stroke-width="1">
+                    <title>${d.name}: ${this.format_time(d.value)} (${percent}%)</title>
+                </path>
+            `;
+        }).join('');
+
+        const svg = `
+            <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" style="display: block; margin: 0 auto;">
+                <g transform="translate(${width / 2}, ${height / 2})">
+                    ${slicesHtml}
+                </g>
+            </svg>
+        `;
+
+        container.html(svg);
     }
 
     render_hourly_chart(hourly_data) {
