@@ -18,6 +18,8 @@ class ActivityDashboard {
     constructor(page) {
         this.page = page;
         this.wrapper = page.main;
+        // Store globally for onclick handlers
+        window.activityDashboard = this;
         this.init();
     }
 
@@ -35,7 +37,6 @@ class ActivityDashboard {
             <div class="row">
                 <div class="col-md-12">
                     <div class="page-header">
-                        <h2>BizTracker Activity Dashboard</h2>
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
                             <div class="col-md-3">
                                 <label for="employee">Employee:</label>
@@ -409,32 +410,52 @@ class ActivityDashboard {
             return;
         }
 
-        const html = domains.map(d => {
-            // Create page list
-            const pagesHtml = d.pages.map(p => `
-                <div style="font-size: 11px; margin-left: 32px; color: #666; border-left: 2px solid #eee; padding-left: 8px; margin-top: 2px; display: flex; justify-content: space-between;">
-                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%;" title="${p.title}">${p.title}</span>
+        const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#F7DC6F', '#BB8FCE', '#85C1E9', '#F8B739'];
+        const totalTime = domains.reduce((sum, d) => sum + d.total_time, 0);
+
+        const displayLimit = 8;
+        const displayDomains = domains.slice(0, displayLimit);
+        const hasMore = domains.length > displayLimit;
+
+        const html = displayDomains.map((d, index) => {
+            const color = colors[index % colors.length];
+            const percentage = totalTime > 0 ? ((d.total_time / totalTime) * 100).toFixed(1) : 0;
+
+            // Create compact page list (top 3 pages)
+            const topPages = d.pages.slice(0, 3);
+            const pagesHtml = topPages.map(p => `
+                <div style="font-size: 10px; margin-left: 28px; color: #7f8c8d; padding-left: 8px; margin-top: 2px; display: flex; justify-content: space-between; border-left: 2px solid ${color};">
+                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 75%;" title="${p.title}">${p.title}</span>
                     <span>${this.format_time(p.time)}</span>
                 </div>
             `).join('');
 
             return `
-                <div class="domain-item" style="padding: 10px; border-bottom: 1px solid #f1f1f1;">
-                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div class="activity-item" style="margin-bottom: 12px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px;">
                         <div style="display: flex; align-items: center; flex: 1;">
-                            <img src="${d.icon}" width="20" height="20" style="margin-right: 12px; border-radius: 4px;" onerror="this.src='https://www.google.com/s2/favicons?domain=example.com'">
-                            <div style="font-weight: 500; font-size: 14px; color: #2c3e50;">${d.domain}</div>
+                            <img src="${d.icon}" width="16" height="16" style="margin-right: 8px; border-radius: 3px;" onerror="this.src='https://www.google.com/s2/favicons?domain=example.com'">
+                            <span style="font-size: 13px; font-weight: 500; color: #2c3e50;">${d.domain}</span>
                         </div>
-                        <div style="font-weight: bold; color: #2980b9;">${this.format_time(d.total_time)}</div>
+                        <span style="font-size: 12px; color: #7f8c8d;">${this.format_time(d.total_time)}</span>
                     </div>
-                    <div style="margin-top: 5px;">
-                        ${pagesHtml}
+                    <div style="background: #ecf0f1; border-radius: 4px; height: 20px; position: relative; overflow: hidden;">
+                        <div style="background: ${color}; height: 100%; width: ${percentage}%; border-radius: 4px;"></div>
+                        <span style="position: absolute; right: 8px; top: 2px; font-size: 11px; font-weight: 600; color: #2c3e50;">${percentage}%</span>
                     </div>
+                    ${pagesHtml}
                 </div>
             `;
         }).join('');
 
-        $('#browser_domains_list').html(html);
+        const showMoreBtn = hasMore ? `
+            <button class="btn btn-xs btn-default" style="width: 100%; margin-top: 10px;" onclick="window.activityDashboard.showAllDomains()">
+                <i class="fa fa-chevron-down"></i> Show more
+            </button>
+        ` : '';
+
+        $('#browser_domains_list').html(html + showMoreBtn);
+        this.allDomains = domains;
     }
 
     render_category_sunburst(data) {
@@ -603,26 +624,53 @@ class ActivityDashboard {
     }
 
     render_top_applications(applications) {
+        if (!applications || applications.length === 0) {
+            $('#top_applications_list').html('<div class="text-muted text-center p-3">No application data</div>');
+            return;
+        }
+
         // Render Pie Chart
         this.render_pie_chart('top_applications_chart', applications.map(app => ({
             name: app.applications,
             value: app.total_time
         })), { donut: false });
 
-        const colors = ['#d1f2eb', '#d6eaf8', '#e8daef', '#fdebd0', '#f5b7b1', '#d5f5e3', '#fcf3cf']; // Light shades
+        const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#F7DC6F', '#BB8FCE', '#85C1E9', '#F8B739'];
+        const totalTime = applications.reduce((sum, app) => sum + app.total_time, 0);
 
-        const html = applications.map((app, index) => {
+        // Show only top 5 initially
+        const displayLimit = 5;
+        const displayApps = applications.slice(0, displayLimit);
+        const hasMore = applications.length > displayLimit;
+
+        const html = displayApps.map((app, index) => {
             const color = colors[index % colors.length];
+            const percentage = totalTime > 0 ? ((app.total_time / totalTime) * 100).toFixed(1) : 0;
+
             return `
-                <div class="app-item" style="background-color: ${color}; color: #333; padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #ccc;">
-                    <div class="app-name" style="font-weight: bold;">${app.applications}</div>
-                    <div class="app-time">${this.format_time(app.total_time)}</div>
-                    <div class="app-sessions">${app.session_count} sessions</div>
+                <div class="activity-item" style="margin-bottom: 8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+                        <span style="font-size: 13px; font-weight: 500; color: #2c3e50;">${app.applications}</span>
+                        <span style="font-size: 12px; color: #7f8c8d;">${this.format_time(app.total_time)}</span>
+                    </div>
+                    <div style="background: #ecf0f1; border-radius: 4px; height: 20px; position: relative; overflow: hidden;">
+                        <div style="background: ${color}; height: 100%; width: ${percentage}%; border-radius: 4px; transition: width 0.3s;"></div>
+                        <span style="position: absolute; right: 8px; top: 2px; font-size: 11px; font-weight: 600; color: #2c3e50;">${percentage}%</span>
+                    </div>
                 </div>
             `;
         }).join('');
 
-        $('#top_applications_list').html(html);
+        const showMoreBtn = hasMore ? `
+            <button class="btn btn-xs btn-default" style="width: 100%; margin-top: 10px;" onclick="window.activityDashboard.showAllApplications()">
+                <i class="fa fa-chevron-down"></i> Show more
+            </button>
+        ` : '';
+
+        $('#top_applications_list').html(html + showMoreBtn);
+
+        // Store full list for "show more"
+        this.allApplications = applications;
     }
 
     render_employee_activity(employees) {
@@ -638,8 +686,13 @@ class ActivityDashboard {
     }
 
     render_window_titles(titles) {
+        if (!titles || titles.length === 0) {
+            $('#window_titles_list').html('<div class="text-muted text-center p-3">No window data</div>');
+            $('#window_chart').html('');
+            return;
+        }
+
         // Render Donut Chart for Window Titles
-        // Group small values into "Others" for chart clarity
         let chartData = titles.map(t => ({
             name: t.window_title,
             value: t.total_time
@@ -653,15 +706,40 @@ class ActivityDashboard {
 
         this.render_pie_chart('window_chart', chartData, { donut: true, donutWidth: 50 });
 
-        const html = titles.map(title => `
-            <div class="window-item">
-                <div class="window-title">${title.window_title}</div>
-                <div class="window-app">${title.applications}</div>
-                <div class="window-time">${this.format_time(title.total_time)}</div>
-            </div>
-        `).join('');
+        const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#F7DC6F', '#BB8FCE', '#85C1E9', '#F8B739'];
+        const totalTime = titles.reduce((sum, t) => sum + t.total_time, 0);
 
-        $('#window_titles_list').html(html);
+        const displayLimit = 8;
+        const displayTitles = titles.slice(0, displayLimit);
+        const hasMore = titles.length > displayLimit;
+
+        const html = displayTitles.map((title, index) => {
+            const color = colors[index % colors.length];
+            const percentage = totalTime > 0 ? ((title.total_time / totalTime) * 100).toFixed(1) : 0;
+
+            return `
+                <div class="activity-item" style="margin-bottom: 8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+                        <span style="font-size: 12px; font-weight: 500; color: #2c3e50; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 70%;" title="${title.window_title}">${title.window_title}</span>
+                        <span style="font-size: 11px; color: #7f8c8d;">${this.format_time(title.total_time)}</span>
+                    </div>
+                    <div style="background: #ecf0f1; border-radius: 4px; height: 18px; position: relative; overflow: hidden;">
+                        <div style="background: ${color}; height: 100%; width: ${percentage}%; border-radius: 4px;"></div>
+                        <span style="position: absolute; right: 6px; top: 1px; font-size: 10px; font-weight: 600; color: #2c3e50;">${percentage}%</span>
+                    </div>
+                    <div style="font-size: 10px; color: #95a5a6; margin-top: 2px;">${title.applications}</div>
+                </div>
+            `;
+        }).join('');
+
+        const showMoreBtn = hasMore ? `
+            <button class="btn btn-xs btn-default" style="width: 100%; margin-top: 10px;" onclick="window.activityDashboard.showAllWindows()">
+                <i class="fa fa-chevron-down"></i> Show more
+            </button>
+        ` : '';
+
+        $('#window_titles_list').html(html + showMoreBtn);
+        this.allWindows = titles;
     }
 
     render_pie_chart(containerId, data, options = {}) {
@@ -870,15 +948,11 @@ class ActivityDashboard {
                         <strong>Category:</strong> ${activity.category || 'N/A'}
                     </div>
                     
+                    
                     <div style="margin-bottom: 6px;">
                         <strong>Event:</strong> ${activity.event_name} (${activity.event_id})
                     </div>
                     
-                    ${activity.window_title ? `
-                        <div style="margin-bottom: 6px; font-style: italic; color: #555;">
-                            <strong>Window:</strong> ${activity.window_title}
-                        </div>
-                    ` : ''}
                     
                     <div style="display: flex; justify-content: space-between; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(0,0,0,0.1);">
                         <div class="activity-duration" style="font-weight: bold; color: #2196F3;">
@@ -899,11 +973,126 @@ class ActivityDashboard {
     format_time(seconds) {
         const hours = Math.floor(seconds / 3600);
         const minutes = Math.floor((seconds % 3600) / 60);
+        const secs = Math.floor(seconds % 60);
 
         if (hours > 0) {
-            return `${hours}h ${minutes}m`;
+            return `${hours}h ${minutes}m ${secs}s`;
+        } else if (minutes > 0) {
+            return `${minutes}m ${secs}s`;
         } else {
-            return `${minutes}m`;
+            return `${secs}s`;
         }
+    }
+
+    showAllApplications() {
+        if (!this.allApplications) return;
+
+        const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#F7DC6F', '#BB8FCE', '#85C1E9', '#F8B739'];
+        const totalTime = this.allApplications.reduce((sum, app) => sum + app.total_time, 0);
+
+        const html = this.allApplications.map((app, index) => {
+            const color = colors[index % colors.length];
+            const percentage = totalTime > 0 ? ((app.total_time / totalTime) * 100).toFixed(1) : 0;
+
+            return `
+                <div class="activity-item" style="margin-bottom: 8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+                        <span style="font-size: 13px; font-weight: 500; color: #2c3e50;">${app.applications}</span>
+                        <span style="font-size: 12px; color: #7f8c8d;">${this.format_time(app.total_time)}</span>
+                    </div>
+                    <div style="background: #ecf0f1; border-radius: 4px; height: 20px; position: relative; overflow: hidden;">
+                        <div style="background: ${color}; height: 100%; width: ${percentage}%; border-radius: 4px;"></div>
+                        <span style="position: absolute; right: 8px; top: 2px; font-size: 11px; font-weight: 600; color: #2c3e50;">${percentage}%</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        const showLessBtn = `
+            <button class="btn btn-xs btn-default" style="width: 100%; margin-top: 10px;" onclick="window.activityDashboard.render_top_applications(window.activityDashboard.allApplications)">
+                <i class="fa fa-chevron-up"></i> Show less
+            </button>
+        `;
+
+        $('#top_applications_list').html(html + showLessBtn);
+    }
+
+    showAllWindows() {
+        if (!this.allWindows) return;
+
+        const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#F7DC6F', '#BB8FCE', '#85C1E9', '#F8B739'];
+        const totalTime = this.allWindows.reduce((sum, t) => sum + t.total_time, 0);
+
+        const html = this.allWindows.map((title, index) => {
+            const color = colors[index % colors.length];
+            const percentage = totalTime > 0 ? ((title.total_time / totalTime) * 100).toFixed(1) : 0;
+
+            return `
+                <div class="activity-item" style="margin-bottom: 8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+                        <span style="font-size: 12px; font-weight: 500; color: #2c3e50; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 70%;" title="${title.window_title}">${title.window_title}</span>
+                        <span style="font-size: 11px; color: #7f8c8d;">${this.format_time(title.total_time)}</span>
+                    </div>
+                    <div style="background: #ecf0f1; border-radius: 4px; height: 18px; position: relative; overflow: hidden;">
+                        <div style="background: ${color}; height: 100%; width: ${percentage}%; border-radius: 4px;"></div>
+                        <span style="position: absolute; right: 6px; top: 1px; font-size: 10px; font-weight: 600; color: #2c3e50;">${percentage}%</span>
+                    </div>
+                    <div style="font-size: 10px; color: #95a5a6; margin-top: 2px;">${title.applications}</div>
+                </div>
+            `;
+        }).join('');
+
+        const showLessBtn = `
+            <button class="btn btn-xs btn-default" style="width: 100%; margin-top: 10px;" onclick="window.activityDashboard.render_window_titles(window.activityDashboard.allWindows)">
+                <i class="fa fa-chevron-up"></i> Show less
+            </button>
+        `;
+
+        $('#window_titles_list').html(html + showLessBtn);
+    }
+
+    showAllDomains() {
+        if (!this.allDomains) return;
+
+        const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#F7DC6F', '#BB8FCE', '#85C1E9', '#F8B739'];
+        const totalTime = this.allDomains.reduce((sum, d) => sum + d.total_time, 0);
+
+        const html = this.allDomains.map((d, index) => {
+            const color = colors[index % colors.length];
+            const percentage = totalTime > 0 ? ((d.total_time / totalTime) * 100).toFixed(1) : 0;
+
+            const topPages = d.pages.slice(0, 3);
+            const pagesHtml = topPages.map(p => `
+                <div style="font-size: 10px; margin-left: 28px; color: #7f8c8d; padding-left: 8px; margin-top: 2px; display: flex; justify-content: space-between; border-left: 2px solid ${color};">
+                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 75%;" title="${p.title}">${p.title}</span>
+                    <span>${this.format_time(p.time)}</span>
+                </div>
+            `).join('');
+
+            return `
+                <div class="activity-item" style="margin-bottom: 12px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px;">
+                        <div style="display: flex; align-items: center; flex: 1;">
+                            <img src="${d.icon}" width="16" height="16" style="margin-right: 8px; border-radius: 3px;" onerror="this.src='https://www.google.com/s2/favicons?domain=example.com'">
+                            <span style="font-size: 13px; font-weight: 500; color: #2c3e50;">${d.domain}</span>
+                        </div>
+                        <span style="font-size: 12px; color: #7f8c8d;">${this.format_time(d.total_time)}</span>
+                    </div>
+                    <div style="background: #ecf0f1; border-radius: 4px; height: 20px; position: relative; overflow: hidden;">
+                        <div style="background: ${color}; height: 100%; width: ${percentage}%; border-radius: 4px;"></div>
+                        <span style="position: absolute; right: 8px; top: 2px; font-size: 11px; font-weight: 600; color: #2c3e50;">${percentage}%</span>
+                    </div>
+                    ${pagesHtml}
+                </div>
+            `;
+        }).join('');
+
+        const showLessBtn = `
+            <button class="btn btn-xs btn-default" style="width: 100%; margin-top: 10px;" onclick="window.activityDashboard.render_browser_domains(window.activityDashboard.allDomains)">
+                <i class="fa fa-chevron-up"></i> Show less
+            </button>
+        `;
+
+        $('#browser_domains_list').html(html + showLessBtn);
     }
 }
