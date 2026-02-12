@@ -1,0 +1,29 @@
+{
+ "content": null,
+ "creation": "2025-07-21 22:35:01.764956",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2025-07-21 22:46:59.015048",
+ "modified_by": "Administrator",
+ "module": "Biztrack",
+ "name": "activity-dashboard",
+ "owner": "Administrator",
+ "page_name": "activity-dashboard",
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "HR Manager"
+  },
+  {
+   "role": "Administrator"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Activity Dashboard"
+}

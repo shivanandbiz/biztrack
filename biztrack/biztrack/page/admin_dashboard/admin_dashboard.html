@@ -1,0 +1,362 @@
+<div class="admin-dashboard">
+    <!-- Header -->
+    <div class="dashboard-header">
+        <div class="row">
+            <div class="col-md-8">
+                <h2 class="dashboard-title">
+                    <i class="fa fa-dashboard"></i> Admin Dashboard
+                </h2>
+                <div class="refresh-info">
+                    Last updated: <span id="last-updated">Loading...</span> | Auto-refresh: Every 5 minutes
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="company-filter">
+                    <select class="form-control" id="company-filter">
+                        <option value="Biztechnosys">Biztechnosys</option>
+                        <option value="Bizinfra">Bizinfra</option>
+                        <option value="CRM Doctor">CRM Doctor</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Navigation Tabs -->
+    <div class="dashboard-tabs">
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" data-toggle="tab" href="#crm-tab" role="tab">
+                    <i class="fa fa-users"></i> CRM
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#selling-tab" role="tab">
+                    <i class="fa fa-shopping-cart"></i> Selling
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#accounting-tab" role="tab">
+                    <i class="fa fa-calculator"></i> Accounting
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#activity-tab" role="tab">
+                    <i class="fa fa-tasks"></i> Activity
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#contracts-tab" role="tab">
+                    <i class="fa fa-file-contract"></i> Service Contracts
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="tab-content dashboard-content">
+        <!-- CRM Tab -->
+        <div class="tab-pane fade show active" id="crm-tab">
+            <div class="row dashboard-cards">
+                <div class="col-md-3">
+                    <div class="dashboard-card card-new-leads">
+                        <div class="card-header">
+                            <i class="fa fa-user-plus"></i>
+                            <span>New Leads</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-value" id="new-leads-count">0</div>
+                            <div class="card-subtitle">This Month</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="dashboard-card card-qualified-leads">
+                        <div class="card-header">
+                            <i class="fa fa-check-circle"></i>
+                            <span>Qualified Leads</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-value" id="qualified-leads-count">0</div>
+                            <div class="card-subtitle">This Month</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="dashboard-card card-converted-leads">
+                        <div class="card-header">
+                            <i class="fa fa-trophy"></i>
+                            <span>Converted</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-value" id="converted-leads-count">0</div>
+                            <div class="card-subtitle">This Month</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="dashboard-card card-lost-leads">
+                        <div class="card-header">
+                            <i class="fa fa-times-circle"></i>
+                            <span>Lost Leads</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-value" id="lost-leads-count">0</div>
+                            <div class="card-subtitle">This Month</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Opportunities Section -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="widget-box">
+                        <div class="widget-header">
+                            <h4><i class="fa fa-bullseye"></i> Opportunities</h4>
+                        </div>
+                        <div class="widget-content">
+                            <div class="opportunities-chart" id="opportunities-chart"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="widget-box">
+                        <div class="widget-header">
+                            <h4><i class="fa fa-chart-line"></i> Sales Performance</h4>
+                        </div>
+                        <div class="widget-content">
+                            <div class="sales-metrics">
+                                <div class="metric">
+                                    <span class="metric-label">Sales Order Value</span>
+                                    <span class="metric-value" id="sales-order-value">₹0</span>
+                                </div>
+                                <div class="metric">
+                                    <span class="metric-label">Target Achieved</span>
+                                    <span class="metric-value" id="target-achieved">0%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Selling Tab -->
+        <div class="tab-pane fade" id="selling-tab">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="widget-box">
+                        <div class="widget-header">
+                            <h4><i class="fa fa-tags"></i> Product Categories</h4>
+                        </div>
+                        <div class="widget-content">
+                            <div class="row product-categories">
+                                <div class="col-md-4">
+                                    <div class="category-card staffing-card">
+                                        <div class="category-header">
+                                            <i class="fa fa-users"></i>
+                                            <h5>Staffing</h5>
+                                        </div>
+                                        <div class="category-content" id="staffing-products">
+                                            <!-- Products will be loaded here -->
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="category-card crm-doctor-card">
+                                        <div class="category-header">
+                                            <i class="fa fa-user-md"></i>
+                                            <h5>CRM Doctor</h5>
+                                        </div>
+                                        <div class="category-content" id="crm-doctor-products">
+                                            <!-- Products will be loaded here -->
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="category-card custom-dev-card">
+                                        <div class="category-header">
+                                            <i class="fa fa-code"></i>
+                                            <h5>Custom Development</h5>
+                                        </div>
+                                        <div class="category-content" id="custom-dev-products">
+                                            <!-- Products will be loaded here -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Accounting Tab -->
+        <div class="tab-pane fade" id="accounting-tab">
+            <div class="row dashboard-cards">
+                <div class="col-md-3">
+                    <div class="dashboard-card card-outstanding">
+                        <div class="card-header">
+                            <i class="fa fa-exclamation-triangle"></i>
+                            <span>Outstanding Amount</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-value" id="outstanding-amount">₹0</div>
+                            <div class="card-subtitle">Current FY</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="dashboard-card card-billed">
+                        <div class="card-header">
+                            <i class="fa fa-file-invoice"></i>
+                            <span>Total Billed</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-value" id="total-billed">₹0</div>
+                            <div class="card-subtitle">Current FY</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="dashboard-card card-received">
+                        <div class="card-header">
+                            <i class="fa fa-check-double"></i>
+                            <span>Amount Received</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-value" id="amount-received">₹0</div>
+                            <div class="card-subtitle">Current FY</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="dashboard-card card-pending">
+                        <div class="card-header">
+                            <i class="fa fa-clock"></i>
+                            <span>Yet to Receive</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-value" id="yet-to-receive">₹0</div>
+                            <div class="card-subtitle">Current FY</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activity Tab -->
+        <div class="tab-pane fade" id="activity-tab">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="activity-widget">
+                        <div class="widget-header">
+                            <h5><i class="fa fa-tasks"></i> Tasks</h5>
+                        </div>
+                        <div class="widget-content">
+                            <div class="task-metrics">
+                                <div class="task-item completed">
+                                    <span class="status-indicator green"></span>
+                                    <span>Completed: <strong id="completed-tasks">0</strong></span>
+                                </div>
+                                <div class="task-item pending">
+                                    <span class="status-indicator yellow"></span>
+                                    <span>Pending: <strong id="pending-tasks">0</strong></span>
+                                </div>
+                                <div class="task-item overdue">
+                                    <span class="status-indicator red"></span>
+                                    <span>Overdue: <strong id="overdue-tasks">0</strong></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="activity-widget">
+                        <div class="widget-header">
+                            <h5><i class="fa fa-quote-right"></i> Quotations</h5>
+                        </div>
+                        <div class="widget-content">
+                            <div class="quotation-count">
+                                <span class="count-value" id="quotation-count">0</span>
+                                <span class="count-label">This Month</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="activity-widget">
+                        <div class="widget-header">
+                            <h5><i class="fa fa-project-diagram"></i> Projects</h5>
+                        </div>
+                        <div class="widget-content">
+                            <div class="project-metrics">
+                                <div class="project-item active">
+                                    <span class="status-indicator green"></span>
+                                    <span>Active: <strong id="active-projects">0</strong></span>
+                                </div>
+                                <div class="project-item inactive">
+                                    <span class="status-indicator red"></span>
+                                    <span>Inactive: <strong id="inactive-projects">0</strong></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Alert Legend -->
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="status-legend">
+                        <h5>Status Indicators</h5>
+                        <div class="legend-items">
+                            <div class="legend-item">
+                                <span class="status-indicator red"></span>
+                                <span>Red → Escalation to Kalpesh Sir</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="status-indicator yellow"></span>
+                                <span>Yellow → Kalpesh Sir involvement might or might not be needed</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="status-indicator green"></span>
+                                <span>Green → Good to go with Project Manager</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Service Contracts Tab -->
+        <div class="tab-pane fade" id="contracts-tab">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="contract-alert expired">
+                        <div class="alert-header">
+                            <i class="fa fa-exclamation-circle"></i>
+                            <h5>Expired Contracts</h5>
+                        </div>
+                        <div class="alert-content" id="expired-contracts">
+                            <!-- Expired contracts will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="contract-alert expiring">
+                        <div class="alert-header">
+                            <i class="fa fa-clock"></i>
+                            <h5>Expiring in 15 Days</h5>
+                        </div>
+                        <div class="alert-content" id="expiring-contracts">
+                            <!-- Expiring contracts will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

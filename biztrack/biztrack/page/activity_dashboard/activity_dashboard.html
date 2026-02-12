@@ -1,0 +1,102 @@
+<!-- //activity_dashboard.html -->
+
+<div class="activity-dashboard">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="page-header">
+                <h2>Biztrack Activity Dashboard</h2>
+                <div class="col-md-4">
+                    <label for="employee">Employee:</label>
+                    <select id="employee" class="form-control">
+                        <option value="">All Employees</option>
+                    </select>
+                </div>
+                <div class="dashboard-controls">
+                    <input type="date" id="from_date" class="form-control" style="width: 150px; display: inline-block;">
+                    <input type="date" id="to_date" class="form-control" style="width: 150px; display: inline-block;">
+                    <button class="btn btn-primary" onclick="refresh_dashboard()">Refresh</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row dashboard-summary">
+        <div class="col-md-3">
+            <div class="summary-card">
+                <h4>Total Time</h4>
+                <div class="summary-value" id="total_time">0h 0m</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="summary-card">
+                <h4>Active Sessions</h4>
+                <div class="summary-value" id="active_sessions">0</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="summary-card">
+                <h4>Applications Used</h4>
+                <div class="summary-value" id="unique_apps">0</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="summary-card">
+                <h4>Average Session</h4>
+                <div class="summary-value" id="avg_session">0m</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard Sections -->
+    <div class="row">
+        <div class="col-md-4">
+            <div class="dashboard-section">
+                <h3>Top Applications</h3>
+                <div id="top_applications_chart"></div>
+                <div id="top_applications_list"></div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="dashboard-section">
+                <h3>Top Categories</h3>
+                <div id="category_chart"></div>
+                <div id="category_list"></div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="dashboard-section">
+                <h3>Employee Activity</h3>
+                <div id="employee_chart"></div>
+                <div id="employee_list"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="dashboard-section">
+                <h3>Daily Activity Timeline</h3>
+                <div id="timeline_chart"></div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="dashboard-section">
+                <h3>Window Titles</h3>
+                <div id="window_titles_list"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="dashboard-section">
+                <h3>Real-time Activity</h3>
+                <div id="realtime_activity"></div>
+            </div>
+        </div>
+    </div>
+</div>

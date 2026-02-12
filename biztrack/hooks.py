@@ -5,6 +5,60 @@ app_description = "Biztrack Application Tracking"
 app_email = "shivanand.b@biztechnosys.com"
 app_license = "mit"
 
+
+# after_install = "biztrack.biztrack.dashboard_setup.setup_dashboard"
+# Include files
+app_include_css = "/assets/biztrack/css/activity_dashboard.css"
+
+app_include_js = [
+    "/assets/biztrack/js/company_theme.js"
+]
+# app_include_js = "/assets/biztrack/js/erp_chatbot.js"
+
+
+# Website route rules
+website_route_rules = [
+    {"from_route": "/activity-dashboard", "to_route": "activity-dashboard"},
+]
+
+# Fixtures
+fixtures = [
+    {"doctype": "Dashboard Chart", "filters": {"module": "Biztrack"}},
+]
+
+
+api_methods = [
+    "biztrack.biztrack.page.admin_dashboard.admin_dashboard.get_dashboard_data",
+    "biztrack.biztrack.page.admin_dashboard.admin_dashboard.get_company_list",
+    "biztrack.biztrack.page.admin_dashboard.notifications.send_test_notification"
+]
+
+scheduler_events = {
+    "daily": [
+        "biztrack.biztrack.page.notifications.send_contract_expiry_alerts"
+    ]
+}
+
+doc_events = {
+    # "Contract": {
+    #     "after_insert": "biztrack.biztrack.page.notifications.contract_created",
+    #     "on_update": "biztrack.biztrack.page.notifications.contract_updated",
+    #     "on_cancel": "biztrack.biztrack.page.notifications.contract_cancelled"
+    # }
+    # "Lead": {
+    #     "on_update": "biztrack.biztrack.page.events.lead_updated"
+    # },
+    # "Project": {
+    #     "on_update": "biztrack.biztrack.page.events.project_updated"
+    # }
+}
+
+# Custom permissions
+# permission_query_conditions = {
+#     "Contract": "biztrack.biztrack.page.permissions.get_contract_permission_query_conditions"
+# }
+
+
 # Apps
 # ------------------
 
@@ -20,12 +74,18 @@ app_license = "mit"
 # 		"has_permission": "biztrack.api.permission.has_app_permission"
 # 	}
 # ]
-
+doc_events = {
+    "Job Offer": {
+        "on_load": "biztrack.custom.job_offer.set_print_format",
+        "validate": "biztrack.custom.job_offer.set_print_format",
+        "on_submit": "biztrack.custom.job_offer.set_print_format"
+    }
+}
 # Includes in <head>
 # ------------------
 
 # include js, css files in header of desk.html
-# app_include_css = "/assets/biztrack/css/biztrack.css"
+app_include_css = "/assets/biztrack/css/biztrack.css"
 # app_include_js = "/assets/biztrack/js/biztrack.js"
 
 # include js, css files in header of web template

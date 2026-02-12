@@ -1,0 +1,126 @@
+{
+ "charts": [
+  {
+   "chart_name": "Task Status Overview",
+   "label": "Task Status Overview"
+  },
+  {
+   "chart_name": "Lead Statu",
+   "label": "Lead Status View"
+  },
+  {
+   "chart_name": "Project Overview 164",
+   "label": "Project Overview"
+  },
+  {
+   "chart_name": "Tickets",
+   "label": "Tickets"
+  }
+ ],
+ "content": "[{\"id\":\"P2j5bqTMJ5\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Admin Dashboard\",\"col\":3}},{\"id\":\"J4a8EMmMKk\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"iwEq6cchuD\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Activity Dashboard</span>\",\"col\":12}},{\"id\":\"pHCULcHLDd\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Revenue\",\"col\":3}},{\"id\":\"0Zn9dcHi7r\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Today's Users\",\"col\":3}},{\"id\":\"zl0zcCt1Jv\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Sales Order\",\"col\":3}},{\"id\":\"Ka5bx_kqz5\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Customers\",\"col\":3}},{\"id\":\"bXsF7n-Af2\",\"type\":\"paragraph\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>CRM Dashboard</b></span>\",\"col\":12}},{\"id\":\"xjoHaXyMHP\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"New Lead\",\"col\":3}},{\"id\":\"1RCExlwq-i\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"New Opportunity\",\"col\":3}},{\"id\":\"ws0JRHvImN\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Won Opportunity\",\"col\":3}},{\"id\":\"1A58dS7tDa\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Open Opportunity\",\"col\":3}},{\"id\":\"ANU92ObCAo\",\"type\":\"paragraph\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Accounting Dashboard</b></span>\",\"col\":12}},{\"id\":\"SVZBGJ5kBJ\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Outgoing Bills\",\"col\":3}},{\"id\":\"E2EgbBjw-B\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Incoming Bills\",\"col\":3}},{\"id\":\"DP8AhGoZjS\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Incoming Payment\",\"col\":3}},{\"id\":\"0UnNUWWFiY\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Outgoing Payment\",\"col\":3}},{\"id\":\"umJJZzMqHz\",\"type\":\"paragraph\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Service Contracts</b></span>\",\"col\":12}},{\"id\":\"Zb8IPQVQZF\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Active Contracts\",\"col\":3}},{\"id\":\"m8-y3XUDFr\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Expired Contracts\",\"col\":3}},{\"id\":\"N1r4qmP8af\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Unsigned Contracts\",\"col\":3}},{\"id\":\"O1kx8eox95\",\"type\":\"quick_list\",\"data\":{\"quick_list_name\":\"Employee ToDO\",\"col\":6}},{\"id\":\"FWnWKmeLb8\",\"type\":\"quick_list\",\"data\":{\"quick_list_name\":\"Employee Activity Log\",\"col\":6}},{\"id\":\"zF1GlXXf-Z\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Task Status Overview\",\"col\":6}},{\"id\":\"enLcukWzFK\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Lead Status View\",\"col\":6}},{\"id\":\"Qw18abqqbS\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Project Overview\",\"col\":12}},{\"id\":\"LfMt5oD1nv\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Tickets\",\"col\":12}}]",
+ "creation": "2025-08-04 11:34:01.779501",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "image-view",
+ "idx": 0,
+ "indicator_color": "",
+ "is_hidden": 0,
+ "label": "Active Dashboard",
+ "links": [],
+ "modified": "2025-09-18 16:34:15.398481",
+ "modified_by": "Administrator",
+ "module": "Biztrack",
+ "name": "Active Dashboard",
+ "number_cards": [
+  {
+   "label": "Sales Order",
+   "number_card_name": "Booking"
+  },
+  {
+   "label": "Customers",
+   "number_card_name": "Followers"
+  },
+  {
+   "label": "New Lead",
+   "number_card_name": "New Lead (Last 1 Month)"
+  },
+  {
+   "label": "New Opportunity",
+   "number_card_name": "New Opportunity (Last 1 Month)"
+  },
+  {
+   "label": "Won Opportunity",
+   "number_card_name": "Won Opportunity (Last 1 Month)"
+  },
+  {
+   "label": "Open Opportunity",
+   "number_card_name": "Open Opportunity"
+  },
+  {
+   "label": "Total Outgoing Bills",
+   "number_card_name": "Total Outgoing Bills"
+  },
+  {
+   "label": "Total Incoming Payment",
+   "number_card_name": "Total Incoming Payment"
+  },
+  {
+   "label": "Total Outgoing Payment",
+   "number_card_name": "Total Outgoing Payment"
+  },
+  {
+   "label": "Active Contracts",
+   "number_card_name": "Contract"
+  },
+  {
+   "label": "Expired Contracts",
+   "number_card_name": "Inactive Contract"
+  },
+  {
+   "label": "Today's Users",
+   "number_card_name": "Today Users"
+  },
+  {
+   "label": "Revenue",
+   "number_card_name": "Total Outgoing Bills"
+  },
+  {
+   "label": "Total Incoming Bills",
+   "number_card_name": "Total Incoming Bills"
+  },
+  {
+   "label": "Unsigned Contracts",
+   "number_card_name": "Unsigned Contract"
+  }
+ ],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [
+  {
+   "document_type": "ToDo",
+   "label": "Employee ToDO",
+   "quick_list_filter": "[]"
+  },
+  {
+   "document_type": "Activity Log",
+   "label": "Employee Activity Log",
+   "quick_list_filter": "[]"
+  }
+ ],
+ "roles": [],
+ "sequence_id": 1.0,
+ "shortcuts": [
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Admin Dashboard",
+   "link_to": "admin-dashboard",
+   "type": "Page"
+  }
+ ],
+ "title": "Active Dashboard"
+}
