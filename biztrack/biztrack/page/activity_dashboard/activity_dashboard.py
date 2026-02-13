@@ -445,10 +445,25 @@ def build_category_tree(categories):
             node = get_or_create_child(current_children, part)
             
             # Add values to current node (aggregating up the tree)
-            node['value'] += cat.total_time
+            # Use total_seconds for numeric aggregation
+            node['value'] += cat.total_seconds
             node['sessions'] += cat.session_count
             
             # Move down to children
             current_children = node['children']
-            
+    
+    # Convert all node values from seconds to readable format
+    def convert_tree_values(node):
+        if isinstance(node['value'], (int, float)):
+            seconds = int(node['value'])
+            hours = seconds // 3600
+            minutes = (seconds % 3600) // 60
+            secs = seconds % 60
+            node['total_time'] = f"{hours:02d}:{minutes:02d}:{secs:02d}"
+            node['total_seconds'] = seconds  # Keep for sorting
+        
+        for child in node['children']:
+            convert_tree_values(child)
+    
+    convert_tree_values(tree)
     return tree
