@@ -917,49 +917,86 @@ class ActivityDashboard {
     }
 
     render_realtime_activity(activities) {
-        const pastelColors = [
-            '#fef6e4',  // Light Cream
-            '#e0f7fa',  // Light Aqua
-            '#f3e5f5',  // Lavender
-            '#fff3e0',  // Peach
-            '#e8f5e9',  // Mint
-            '#e3f2fd',  // Baby Blue
-            '#f9fbe7',  // Lemon Tint
-        ];
+        if (!activities || activities.length === 0) {
+            $('#realtime_activity').html('<div class="text-center text-muted p-20">No recent activity</div>');
+            return;
+        }
 
         const html = activities.map((activity, index) => {
-            const color = pastelColors[index % pastelColors.length];
+            // Clean up application name - remove "Native Application" if present
+            let appName = activity.applications || 'Unknown';
+
+            // If category and application are the same, just show one
+            let categoryName = activity.category || 'Uncategorized';
+            if (categoryName === appName) {
+                categoryName = null; // Don't show duplicate
+            }
+
+            // Format time nicely
+            const timeStr = frappe.datetime.get_time(activity.creation);
+
             return `
-                <div class="realtime-item" style="background-color: ${color}; color: #333; padding: 12px; border-radius: 10px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #e0e0e0;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <div class="activity-time" style="font-weight: bold; color: #555;">
-                            ${frappe.datetime.get_time(activity.creation)}
+                <div class="realtime-activity-card" style="
+                    background: white;
+                    border: 1px solid #e0e0e0;
+                    border-left: 4px solid #2196F3;
+                    border-radius: 6px;
+                    padding: 16px;
+                    margin-bottom: 12px;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+                    transition: box-shadow 0.2s;
+                " onmouseover="this.style.boxShadow='0 4px 8px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='0 2px 4px rgba(0,0,0,0.05)'">
+                    
+                    <!-- Header: Time and Employee -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f0f0f0;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <i class="fa fa-clock-o" style="color: #2196F3;"></i>
+                            <span style="font-weight: 600; color: #2c3e50; font-size: 14px;">${timeStr}</span>
                         </div>
-                        <div class="activity-user" style="color: #666;">
-                            ${activity.employee_name}
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <i class="fa fa-user" style="color: #95a5a6; font-size: 12px;"></i>
+                            <span style="color: #7f8c8d; font-size: 13px;">${activity.employee_name}</span>
                         </div>
                     </div>
                     
-                    <div style="margin-bottom: 6px;">
-                        <strong>Application:</strong> ${activity.applications}
-                    </div>
-                    
-                    <div style="margin-bottom: 6px;">
-                        <strong>Category:</strong> ${activity.category || 'N/A'}
-                    </div>
-                    
-                    
-                    <div style="margin-bottom: 6px;">
-                        <strong>Event:</strong> ${activity.event_name} (${activity.event_id})
-                    </div>
-                    
-                    
-                    <div style="display: flex; justify-content: space-between; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(0,0,0,0.1);">
-                        <div class="activity-duration" style="font-weight: bold; color: #2196F3;">
-                            Duration: ${this.format_time(activity.duration)}
+                    <!-- Main Content: Application and Category -->
+                    <div style="margin-bottom: 12px;">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                            <i class="fa fa-desktop" style="color: #3498db; font-size: 14px;"></i>
+                            <span style="font-size: 15px; font-weight: 600; color: #2c3e50;">${appName}</span>
                         </div>
-                        <div class="activity-idle" style="color: #999;">
-                            Idle: ${this.format_time(activity.idle_duration)}
+                        ${categoryName ? `
+                            <div style="display: flex; align-items: center; gap: 8px; margin-left: 22px;">
+                                <i class="fa fa-tag" style="color: #95a5a6; font-size: 11px;"></i>
+                                <span style="font-size: 12px; color: #7f8c8d;">${categoryName}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                    
+                    <!-- Event Info -->
+                    <div style="background: #f8f9fa; padding: 8px 12px; border-radius: 4px; margin-bottom: 10px;">
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <i class="fa fa-info-circle" style="color: #95a5a6; font-size: 11px;"></i>
+                            <span style="font-size: 11px; color: #7f8c8d;">
+                                <strong>Event:</strong> ${activity.event_name} 
+                                <span style="color: #bdc3c7;">(${activity.event_id})</span>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Footer: Duration and Idle -->
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <i class="fa fa-hourglass-half" style="color: #27ae60; font-size: 12px;"></i>
+                            <span style="font-size: 13px; font-weight: 600; color: #27ae60;">
+                                ${this.format_time(activity.duration)}
+                            </span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <i class="fa fa-pause-circle" style="color: #e67e22; font-size: 12px;"></i>
+                            <span style="font-size: 12px; color: #95a5a6;">
+                                Idle: ${this.format_time(activity.idle_duration)}
+                            </span>
                         </div>
                     </div>
                 </div>
