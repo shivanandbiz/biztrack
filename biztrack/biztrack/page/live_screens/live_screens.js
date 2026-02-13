@@ -70,7 +70,7 @@ class LiveScreensView {
                 <div class="col-md-9">
                     <div id="video-container">
                         <h4 id="stream-title">Select an employee to view their screen</h4>
-                        <video id="remote-video" autoplay playsinline style="display: none;"></video>
+                        <video id="remote-video" autoplay playsinline style="display: none; width: 100%; max-width: 1200px; height: auto; border: 2px solid #ddd; border-radius: 8px; background: #000;"></video>
                         <div id="stream-controls" style="margin-top: 15px; display: none;">
                             <button class="btn btn-danger btn-sm" id="stop-stream-btn">
                                 <i class="fa fa-stop"></i> Stop Viewing
@@ -182,10 +182,16 @@ class LiveScreensView {
             config: {
                 iceServers: [
                     { urls: 'stun:stun.l.google.com:19302' },
-                    { urls: 'stun:stun1.l.google.com:19302' }
+                    { urls: 'stun:stun1.l.google.com:19302' },
+                    {
+                        urls: 'turn:openrelay.metered.ca:80',
+                        username: 'openrelayproject',
+                        credential: 'openrelayproject'
+                    }
                 ]
             }
         });
+        console.log('[LiveView] ✅ Peer instance created');
 
         this.peer.on('signal', (answer) => {
             console.log('[LiveView] 📤 Sending answer to employee');
@@ -195,11 +201,44 @@ class LiveScreensView {
             });
         });
 
+        this.peer.on('connect', () => {
+            console.log('[LiveView] 🔗 Peer connected!');
+        });
+
+        // Monitor ICE connection state
+        if (this.peer._pc) {
+            this.peer._pc.oniceconnectionstatechange = () => {
+                console.log('[LiveView] 🧊 ICE connection state:', this.peer._pc.iceConnectionState);
+            };
+            this.peer._pc.onicegatheringstatechange = () => {
+                console.log('[LiveView] 🧊 ICE gathering state:', this.peer._pc.iceGatheringState);
+            };
+        }
+
+        this.peer.on('data', (data) => {
+            console.log('[LiveView] 📦 Data received:', data);
+        });
+
+        this.peer.on('track', (track, stream) => {
+            console.log('[LiveView] 🎬 Track received!', track.kind, track.readyState);
+            console.log('[LiveView] 🎥 Stream from track:', stream);
+            const video = document.getElementById('remote-video');
+            video.srcObject = stream;
+            video.play().catch(e => console.error('[LiveView] Video play error:', e));
+        });
+
         this.peer.on('stream', (stream) => {
             console.log('[LiveView] ✅ Stream received! Displaying video...');
+            console.log('[LiveView] Stream details:', {
+                id: stream.id,
+                active: stream.active,
+                videoTracks: stream.getVideoTracks().length,
+                audioTracks: stream.getAudioTracks().length
+            });
             const video = document.getElementById('remote-video');
             video.srcObject = stream;
             video.style.display = 'block';
+            video.play().catch(e => console.error('[LiveView] Video play error:', e));
             $('#stream-controls').show();
             $('#stream-status').text('🔴 Live streaming...').css('color', '#4CAF50');
 
@@ -211,6 +250,7 @@ class LiveScreensView {
 
         this.peer.on('error', (err) => {
             console.error('[LiveView] ❌ Peer error:', err);
+            console.error('[LiveView] ❌ Error details:', err.message, err.code);
             $('#stream-status').text('Connection error').css('color', '#F44336');
             frappe.msgprint({
                 title: 'Connection Error',
@@ -224,7 +264,9 @@ class LiveScreensView {
             this.stopViewing();
         });
 
+        console.log('[LiveView] 📨 Signaling offer to peer...');
         this.peer.signal(offer);
+        console.log('[LiveView] ✅ Offer signaled');
     }
 
     stopViewing() {

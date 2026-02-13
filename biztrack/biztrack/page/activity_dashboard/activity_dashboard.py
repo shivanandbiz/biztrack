@@ -24,49 +24,73 @@ def get_activity_summary(date=None, employee=None):
     # Top Applications
     top_apps = frappe.db.sql(f"""
         SELECT 
-            applications,
-            SUM(duration) as total_time,
+            application_id,
+            SUM(TIME_TO_SEC(duration)) as total_seconds,
             COUNT(*) as session_count
         FROM `tabApplications Tracking`
-        WHERE {conditions}
-        GROUP BY applications
-        ORDER BY total_time DESC
+        WHERE {conditions} AND application_id IS NOT NULL
+        GROUP BY application_id
+        ORDER BY total_seconds DESC
         LIMIT 10
     """, as_dict=True)
+    
+    # Convert seconds back to readable format
+    for app in top_apps:
+        seconds = int(app['total_seconds'] or 0)
+        hours = seconds // 3600
+        minutes = (seconds % 3600) // 60
+        secs = seconds % 60
+        app['total_time'] = f"{hours:02d}:{minutes:02d}:{secs:02d}"
     
     # Top Categories
     top_categories = frappe.db.sql(f"""
         SELECT 
             category,
-            SUM(duration) as total_time,
+            SUM(TIME_TO_SEC(duration)) as total_seconds,
             COUNT(*) as session_count
         FROM `tabApplications Tracking`
         WHERE {conditions} AND category IS NOT NULL
         GROUP BY category
-        ORDER BY total_time DESC
+        ORDER BY total_seconds DESC
         LIMIT 10
     """, as_dict=True)
+    
+    # Convert seconds back to readable format
+    for cat in top_categories:
+        seconds = int(cat['total_seconds'] or 0)
+        hours = seconds // 3600
+        minutes = (seconds % 3600) // 60
+        secs = seconds % 60
+        cat['total_time'] = f"{hours:02d}:{minutes:02d}:{secs:02d}"
     
     # Employee Activity
     employee_activity = frappe.db.sql(f"""
         SELECT 
             employee_name,
             employee,
-            SUM(duration) as total_time,
+            SUM(TIME_TO_SEC(duration)) as total_seconds,
             COUNT(*) as session_count,
-            COUNT(DISTINCT applications) as unique_apps
+            COUNT(DISTINCT application_id) as unique_apps
         FROM `tabApplications Tracking`
         WHERE {conditions}
         GROUP BY employee_name, employee
-        ORDER BY total_time DESC
+        ORDER BY total_seconds DESC
         LIMIT 10
     """, as_dict=True)
+    
+    # Convert seconds back to readable format
+    for emp in employee_activity:
+        seconds = int(emp['total_seconds'] or 0)
+        hours = seconds // 3600
+        minutes = (seconds % 3600) // 60
+        secs = seconds % 60
+        emp['total_time'] = f"{hours:02d}:{minutes:02d}:{secs:02d}"
     
     # Daily Activity Timeline (for the selected date, show hourly breakdown)
     daily_activity = frappe.db.sql(f"""
         SELECT 
             DATE(creation) as date,
-            SUM(duration) as total_time,
+            SUM(TIME_TO_SEC(duration)) as total_seconds,
             COUNT(*) as session_count
         FROM `tabApplications Tracking`
         WHERE {conditions}
@@ -74,19 +98,35 @@ def get_activity_summary(date=None, employee=None):
         ORDER BY DATE(creation)
     """, as_dict=True)
     
+    # Convert seconds to readable format
+    for day in daily_activity:
+        seconds = int(day['total_seconds'] or 0)
+        hours = seconds // 3600
+        minutes = (seconds % 3600) // 60
+        secs = seconds % 60
+        day['total_time'] = f"{hours:02d}:{minutes:02d}:{secs:02d}"
+    
     # Window Titles Analysis
     window_titles = frappe.db.sql(f"""
         SELECT 
             window_title,
-            applications,
-            SUM(duration) as total_time,
+            application_id,
+            SUM(TIME_TO_SEC(duration)) as total_seconds,
             COUNT(*) as frequency
         FROM `tabApplications Tracking`
-        WHERE {conditions} AND window_title IS NOT NULL
-        GROUP BY window_title, applications
-        ORDER BY total_time DESC
+        WHERE {conditions} AND window_title IS NOT NULL AND window_title != ''
+        GROUP BY window_title, application_id
+        ORDER BY total_seconds DESC
         LIMIT 20
     """, as_dict=True)
+    
+    # Convert seconds back to readable format
+    for wt in window_titles:
+        seconds = int(wt['total_seconds'] or 0)
+        hours = seconds // 3600
+        minutes = (seconds % 3600) // 60
+        secs = seconds % 60
+        wt['total_time'] = f"{hours:02d}:{minutes:02d}:{secs:02d}"
     
     return {
         "top_applications": top_apps,
@@ -112,9 +152,9 @@ def get_hourly_activity(date=None, employee=None):
     hourly_data = frappe.db.sql(f"""
         SELECT 
             HOUR(creation) as hour,
-            SUM(duration) as total_time,
+            SUM(TIME_TO_SEC(duration)) as total_seconds,
             COUNT(*) as session_count,
-            COUNT(DISTINCT applications) as unique_apps
+            COUNT(DISTINCT application_id) as unique_apps
         FROM `tabApplications Tracking`
         WHERE {conditions}
         GROUP BY HOUR(creation)
@@ -127,11 +167,20 @@ def get_hourly_activity(date=None, employee=None):
     
     for hour in range(24):
         if hour in hourly_dict:
-            hourly_complete.append(hourly_dict[hour])
+            data = hourly_dict[hour]
+            # Convert seconds to readable format
+            seconds = int(data['total_seconds'] or 0)
+            hours_val = seconds // 3600
+            minutes = (seconds % 3600) // 60
+            secs = seconds % 60
+            data['total_time'] = f"{hours_val:02d}:{minutes:02d}:{secs:02d}"
+            data['total_seconds'] = seconds  # Keep for charting
+            hourly_complete.append(data)
         else:
             hourly_complete.append({
                 'hour': hour,
-                'total_time': 0,
+                'total_time': "00:00:00",
+                'total_seconds': 0,
                 'session_count': 0,
                 'unique_apps': 0
             })
@@ -158,17 +207,26 @@ def get_browser_domains(date=None, employee=None):
     browser_activity = frappe.db.sql(f"""
         SELECT 
             window_title,
-            applications,
-            SUM(duration) as total_time,
+            application_id,
+            SUM(TIME_TO_SEC(duration)) as total_seconds,
             COUNT(*) as session_count
         FROM `tabApplications Tracking`
         WHERE {conditions} 
-            AND applications IN {browser_apps}
+            AND application_id IN {browser_apps}
             AND window_title IS NOT NULL
             AND window_title != ''
-        GROUP BY window_title, applications
-        ORDER BY total_time DESC
+        GROUP BY window_title, application_id
+        ORDER BY total_seconds DESC
+        LIMIT 50
     """, as_dict=True)
+    
+    # Convert seconds to readable format
+    for item in browser_activity:
+        seconds = int(item['total_seconds'] or 0)
+        hours = seconds // 3600
+        minutes = (seconds % 3600) // 60
+        secs = seconds % 60
+        item['total_time'] = f"{hours:02d}:{minutes:02d}:{secs:02d}"
     
     # Extract domains from window titles
     domains = {}
@@ -325,14 +383,22 @@ def get_category_hierarchy(date=None, employee=None):
     categories = frappe.db.sql(f"""
         SELECT 
             category,
-            SUM(duration) as total_time,
+            SUM(TIME_TO_SEC(duration)) as total_seconds,
             COUNT(*) as session_count,
-            GROUP_CONCAT(DISTINCT applications) as apps
+            GROUP_CONCAT(DISTINCT application_id) as apps
         FROM `tabApplications Tracking`
         WHERE {conditions} AND category IS NOT NULL AND category != ''
         GROUP BY category
-        ORDER BY total_time DESC
+        ORDER BY total_seconds DESC
     """, as_dict=True)
+    
+    # Convert seconds to readable format
+    for cat in categories:
+        seconds = int(cat['total_seconds'] or 0)
+        hours = seconds // 3600
+        minutes = (seconds % 3600) // 60
+        secs = seconds % 60
+        cat['total_time'] = f"{hours:02d}:{minutes:02d}:{secs:02d}"
     
     # Build hierarchy (assuming categories use ">" separator like "Work > Programming")
     # If no separator, it treats as flat hierarchy
