@@ -409,6 +409,7 @@ def build_category_tree(categories):
     """Build hierarchical tree from flat category list"""
     tree = {
         'name': 'root',
+        'value': 0,
         'children': []
     }
     
