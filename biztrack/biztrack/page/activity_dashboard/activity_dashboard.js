@@ -119,7 +119,29 @@ class ActivityDashboard {
         $('#stat-avg-session').text(this.format_aw_time_string(avg_seconds));
     }
 
-    // ... (render_hourly_chart remains same) ...
+    render_hourly_chart(hourly_data) {
+        if (!hourly_data) return;
+
+        const labels = hourly_data.map(h => `${h.hour}:00`);
+        const values = hourly_data.map(h => (h.total_seconds || 0) / 3600);
+
+        new frappe.Chart("#hourly-chart", {
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        name: "Activity (Hours)",
+                        chartType: "bar",
+                        values: values
+                    }
+                ]
+            },
+            title: "Hourly Activity",
+            type: 'bar',
+            height: 250,
+            colors: ['#2196F3']
+        });
+    }
 
     /**
      * Renders a list of items with progress bars (ActivityWatch Style)
