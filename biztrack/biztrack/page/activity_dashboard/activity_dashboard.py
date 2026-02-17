@@ -129,12 +129,37 @@ def get_activity_summary(date=None, employee=None):
         secs = seconds % 60
         wt['total_time'] = f"{hours:02d}:{minutes:02d}:{secs:02d}"
     
+    # Employee App Usage (Detailed Breakdown)
+    employee_app_usage = frappe.db.sql(f"""
+        SELECT 
+            employee_name,
+            employee,
+            MAX(applications) as applications,
+            application_id,
+            SUM(TIME_TO_SEC(duration)) as total_seconds,
+            COUNT(*) as session_count
+        FROM `tabApplications Tracking`
+        WHERE {conditions}
+        GROUP BY employee, application_id
+        ORDER BY employee_name, total_seconds DESC
+        LIMIT 100
+    """, as_dict=True)
+
+    # Convert seconds back to readable format
+    for row in employee_app_usage:
+        seconds = int(row['total_seconds'] or 0)
+        hours = seconds // 3600
+        minutes = (seconds % 3600) // 60
+        secs = seconds % 60
+        row['total_time'] = f"{hours:02d}:{minutes:02d}:{secs:02d}"
+
     return {
         "top_applications": top_apps,
         "top_categories": top_categories,
         "employee_activity": employee_activity,
         "daily_activity": daily_activity,
-        "window_titles": window_titles
+        "window_titles": window_titles,
+        "employee_app_usage": employee_app_usage
     }
 
 @frappe.whitelist()
