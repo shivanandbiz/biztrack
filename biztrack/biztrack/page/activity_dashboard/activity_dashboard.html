@@ -7,67 +7,107 @@
         </div>
     </div>
 
-    <style>
-        .employee-list-item {
-            cursor: pointer;
-            padding: 12px;
-            border-bottom: 1px solid #e0e0e0;
-            transition: background 0.2s;
-        }
+    <div class="row" style="margin-bottom: 20px;">
+        <div class="col-md-12">
+            <div class="form-group"
+                style="display: flex; gap: 10px; align-items: center; background: #f8f9fa; padding: 10px; border-radius: 4px;">
+                <div style="flex: 1;">
+                    <label>Employee</label>
+                    <select id="employee-filter" class="form-control">
+                        <option value="">All Employees</option>
+                    </select>
+                </div>
+                <div style="flex: 1;">
+                    <label>Date</label>
+                    <input type="date" id="date-filter" class="form-control">
+                </div>
+                <div style="margin-top: 24px;">
+                    <button id="refresh-btn" class="btn btn-primary btn-sm">Refresh</button>
+                    <button id="today-btn" class="btn btn-default btn-sm">Today</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        .employee-list-item:hover {
-            background: #f5f5f5;
-        }
-
-        .employee-list-item.active {
-            background: #e3f2fd;
-            border-left: 4px solid #2196F3;
-        }
-
-        .status-indicator {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            margin-right: 8px;
-        }
-
-        .status-online {
-            background: #4CAF50;
-        }
-
-        .status-offline {
-            background: #9E9E9E;
-        }
-
-        #remote-video {
-            width: 100%;
-            max-height: 70vh;
-            background: #000;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-    </style>
+    <!-- Summary Cards -->
+    <div class="row" style="margin-bottom: 20px;">
+        <div class="col-md-3">
+            <div class="dashboard-stat-box"
+                style="background: #e3f2fd; padding: 15px; border-radius: 8px; text-align: center;">
+                <h6 class="text-muted">Total Time</h6>
+                <h3 id="stat-total-time" style="color: #1976D2;">00:00:00</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="dashboard-stat-box"
+                style="background: #f3e5f5; padding: 15px; border-radius: 8px; text-align: center;">
+                <h6 class="text-muted">Active Sessions</h6>
+                <h3 id="stat-sessions" style="color: #7B1FA2;">0</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="dashboard-stat-box"
+                style="background: #e8f5e9; padding: 15px; border-radius: 8px; text-align: center;">
+                <h6 class="text-muted">Applications Used</h6>
+                <h3 id="stat-apps" style="color: #388E3C;">0</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="dashboard-stat-box"
+                style="background: #fff3e0; padding: 15px; border-radius: 8px; text-align: center;">
+                <h6 class="text-muted">Average Session</h6>
+                <h3 id="stat-avg-session" style="color: #F57C00;">00:00:00</h3>
+            </div>
+        </div>
+    </div>
 
     <div class="row">
-        <div class="col-md-3">
-            <h4>Available Employees</h4>
-            <div id="connection-status"
-                style="padding: 10px; margin-bottom: 10px; border-radius: 4px; background: #f5f5f5;">
-                <small>Status: <span id="status-text">Connecting...</span></small>
+        <!-- Hourly Activity Chart -->
+        <div class="col-md-12" style="margin-bottom: 20px;">
+            <div class="chart-container" style="border: 1px solid #ebECF0; padding: 15px; border-radius: 4px;">
+                <h5>Hourly Activity</h5>
+                <div id="hourly-chart"></div>
             </div>
-            <div id="employee-list"></div>
         </div>
-        <div class="col-md-9">
-            <div id="video-container">
-                <h4 id="stream-title">Select an employee to view their screen</h4>
-                <video id="remote-video" autoplay playsinline
-                    style="display: none; width: 100%; max-width: 1200px; height: auto; border: 2px solid #ddd; border-radius: 8px; background: #000;"></video>
-                <div id="stream-controls" style="margin-top: 15px; display: none;">
-                    <button class="btn btn-danger btn-sm" id="stop-stream-btn">
-                        <i class="fa fa-stop"></i> Stop Viewing
-                    </button>
-                    <span id="stream-status" class="text-muted" style="margin-left: 15px;"></span>
+    </div>
+
+    <div class="row">
+        <!-- Top Applications -->
+        <div class="col-md-6" style="margin-bottom: 20px;">
+            <div class="chart-container" style="border: 1px solid #ebECF0; padding: 15px; border-radius: 4px;">
+                <h5>Top Applications</h5>
+                <div id="top-apps-chart"></div>
+                <div id="top-apps-list" style="margin-top: 15px;">
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Application</th>
+                                <th class="text-right">Time</th>
+                                <th class="text-right">%</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Employee Activity -->
+        <div class="col-md-6" style="margin-bottom: 20px;">
+            <div class="chart-container" style="border: 1px solid #ebECF0; padding: 15px; border-radius: 4px;">
+                <h5>Employee Activity</h5>
+                <div id="employee-chart"></div>
+                <div id="employee-list-stats" style="margin-top: 15px;">
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Employee</th>
+                                <th class="text-right">Time</th>
+                                <th class="text-right">Apps</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
             </div>
         </div>

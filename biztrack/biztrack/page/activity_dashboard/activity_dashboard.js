@@ -1,249 +1,242 @@
 // activity_dashboard.js
 
 frappe.pages['activity-dashboard'].on_page_load = function (wrapper) {
-    const page = frappe.ui.make_app_page({
-        parent: wrapper,
-        title: 'Activity Dashboard',
-        single_column: true
-    });
-
-    // Load required libraries
-    frappe.require([
-        '/assets/biztrack/js/socket.io.min.js',
-        '/assets/biztrack/js/simplepeer.min.js'
-    ], () => {
-        new ActivityDashboard(page);
-    });
+    new ActivityDashboard(wrapper);
 };
 
 class ActivityDashboard {
-    constructor(page) {
-        this.page = page;
-        this.socket = null;
-        this.peer = null;
-        this.currentEmployee = null;
-        this.currentEmployeeName = null;
+    constructor(wrapper) {
+        this.wrapper = wrapper;
+        this.page = frappe.ui.make_app_page({
+            parent: wrapper,
+            title: 'Activity Dashboard',
+            single_column: true
+        });
 
-        this.setupUI();
-        this.connectToSignaling();
+        this.setup_ui();
+        this.bind_events();
+        this.load_initial_data();
     }
 
-    setupUI() {
-        // HTML is already loaded from activity_dashboard.html (assuming standard Frappe page load)
-        // Bind Stop button
-        $('#stop-stream-btn').click(() => this.stopViewing());
+    setup_ui() {
+        // HTML is loaded automatically from activity_dashboard.html
+        // We just need to ensure the container is ready
+        this.today = frappe.datetime.get_today();
+        $('#date-filter').val(this.today);
     }
 
-    connectToSignaling() {
-        console.log('[ActivityDashboard] Connecting to signaling server...');
+    bind_events() {
+        const me = this;
 
-        this.socket = io('http://164.52.192.194:5000', {
-            transports: ['websocket'],
-            reconnection: true
+        $('#refresh-btn').on('click', () => this.refresh_data());
+        $('#today-btn').on('click', () => {
+            $('#date-filter').val(this.today);
+            this.refresh_data();
         });
 
-        this.socket.on('connect', () => {
-            console.log('[ActivityDashboard] ✅ Connected to signaling server');
-            $('#status-text').text('Connected').css('color', '#4CAF50');
-            $('#connection-status').css('background', '#E8F5E9');
+        $('#employee-filter, #date-filter').on('change', () => this.refresh_data());
+    }
+
+    async load_initial_data() {
+        // Load employees for filter
+        const employees = await frappe.call({
+            method: 'biztrack.biztrack.page.activity_dashboard.activity_dashboard.get_employees'
         });
 
-        this.socket.on('disconnect', () => {
-            console.log('[ActivityDashboard] ⚠️ Disconnected from signaling server');
-            $('#status-text').text('Disconnected').css('color', '#F44336');
-            $('#connection-status').css('background', '#FFEBEE');
-        });
-
-        this.socket.on('streamer-available', (data) => {
-            console.log('[ActivityDashboard] 📝 Streamer available:', data.employee_name);
-            this.addEmployeeToList(data.employee_id, data.employee_name);
-        });
-
-        this.socket.on('offer', (data) => {
-            console.log('[ActivityDashboard] 📨 Received offer from employee');
-            this.handleOffer(data.offer, data.from);
-        });
-
-        this.socket.on('ice-candidate', (data) => {
-            if (this.peer) {
-                this.peer.signal(data.candidate);
-            }
-        });
-
-        this.socket.on('stream-error', (data) => {
-            frappe.msgprint({
-                title: 'Stream Error',
-                message: data.message,
-                indicator: 'red'
+        if (employees.message) {
+            const select = $('#employee-filter');
+            employees.message.forEach(emp => {
+                select.append(`<option value="${emp.employee}">${emp.employee_name || emp.employee}</option>`);
             });
-        });
+        }
+
+        this.refresh_data();
     }
 
-    addEmployeeToList(employeeId, employeeName) {
-        const existing = $(`#employee-list .employee-list-item[data-id="${employeeId}"]`);
-        if (existing.length === 0) {
-            const html = `
-                <div class="employee-list-item" data-id="${employeeId}">
-                    <span class="status-indicator status-online"></span>
-                    <strong>${employeeName}</strong>
-                </div>
-            `;
-            $('#employee-list').append(html);
+    async refresh_data() {
+        const date = $('#date-filter').val();
+        const employee = $('#employee-filter').val();
 
-            $(`.employee-list-item[data-id="${employeeId}"]`).click(() => {
-                this.startViewing(employeeId, employeeName);
+        frappe.show_progress('Loading Dashboard', 30, 100, 'Please wait');
+
+        try {
+            // Fetch Activity Summary
+            const summary = await frappe.call({
+                method: 'biztrack.biztrack.page.activity_dashboard.activity_dashboard.get_activity_summary',
+                args: { date, employee }
             });
+
+            // Fetch Hourly Activity
+            const hourly = await frappe.call({
+                method: 'biztrack.biztrack.page.activity_dashboard.activity_dashboard.get_hourly_activity',
+                args: { date, employee }
+            });
+
+            this.render_dashboard(summary.message, hourly.message);
+            frappe.hide_progress();
+
+        } catch (err) {
+            console.error(err);
+            frappe.hide_progress();
+            frappe.msgprint('Error loading dashboard data');
         }
     }
 
-    startViewing(employeeId, employeeName) {
-        if (this.currentEmployee) {
-            this.stopViewing();
-        }
+    render_dashboard(summary, hourly) {
+        if (!summary) return;
 
-        this.currentEmployee = employeeId;
-        this.currentEmployeeName = employeeName;
-
-        // Update UI
-        $('.employee-list-item').removeClass('active');
-        $(`.employee-list-item[data-id="${employeeId}"]`).addClass('active');
-
-        $('#stream-title').text(`Live View: ${employeeName}`);
-        $('#stream-status').text('Connecting...');
-
-        console.log('[ActivityDashboard] 📹 Requesting stream from:', employeeName);
-
-        // Request stream from employee
-        this.socket.emit('request-stream', {
-            employee_id: employeeId
-        });
+        this.render_summary_cards(summary);
+        this.render_hourly_chart(hourly);
+        this.render_top_apps(summary.top_applications);
+        this.render_employee_activity(summary.employee_activity);
     }
 
-    handleOffer(offer, fromId) {
-        console.log('[ActivityDashboard] 📨 Creating peer connection...');
+    render_summary_cards(data) {
+        let total_seconds = 0;
+        let total_sessions = 0;
+        let unique_apps = new Set();
 
-        // Create peer connection to receive stream
-        this.peer = new SimplePeer({
-            initiator: false,
-            trickle: true,
-            config: {
-                iceServers: [
-                    { urls: 'stun:stun.l.google.com:19302' },
-                    { urls: 'stun:stun1.l.google.com:19302' },
+        // Aggregate data from top_applications (or could come partly from employee_activity)
+        // Since summary doesn't return grand totals directly, we calculate from available lists
+        // Note: Ideally backend should return grand totals. Using employee_activity for totals is safer.
+
+        if (data.employee_activity) {
+            data.employee_activity.forEach(emp => {
+                total_seconds += (emp.total_seconds || 0);
+                total_sessions += (emp.session_count || 0);
+            });
+        }
+
+        // For unique apps count
+        if (data.top_applications) {
+            data.top_applications.forEach(app => unique_apps.add(app.application_id));
+        }
+
+        $('#stat-total-time').text(this.format_seconds_to_time(total_seconds));
+        $('#stat-sessions').text(total_sessions);
+        $('#stat-apps').text(data.top_applications ? data.top_applications.length : 0); // Approx
+
+        const avg_seconds = total_sessions > 0 ? Math.round(total_seconds / total_sessions) : 0;
+        $('#stat-avg-session').text(this.format_seconds_to_time(avg_seconds));
+    }
+
+    render_hourly_chart(hourly_data) {
+        if (!hourly_data) return;
+
+        const labels = hourly_data.map(h => `${h.hour}:00`);
+        const values = hourly_data.map(h => (h.total_seconds || 0) / 3600); // In Hours
+
+        new frappe.Chart("#hourly-chart", {
+            data: {
+                labels: labels,
+                datasets: [
                     {
-                        urls: 'turn:openrelay.metered.ca:80',
-                        username: 'openrelayproject',
-                        credential: 'openrelayproject'
+                        name: "Activity (Hours)",
+                        chartType: "bar",
+                        values: values
                     }
                 ]
-            }
+            },
+            title: "Hourly Activity (Hours)",
+            type: 'bar',
+            height: 250,
+            colors: ['#2196F3']
         });
-        console.log('[ActivityDashboard] ✅ Peer instance created');
-
-        this.peer.on('signal', (answer) => {
-            console.log('[ActivityDashboard] 📤 Sending answer to employee');
-            this.socket.emit('answer', {
-                target: fromId,
-                answer: answer
-            });
-        });
-
-        this.peer.on('connect', () => {
-            console.log('[ActivityDashboard] 🔗 Peer connected!');
-        });
-
-        // Monitor ICE connection state
-        if (this.peer._pc) {
-            this.peer._pc.oniceconnectionstatechange = () => {
-                console.log('[ActivityDashboard] 🧊 ICE connection state:', this.peer._pc.iceConnectionState);
-            };
-            this.peer._pc.onicegatheringstatechange = () => {
-                console.log('[ActivityDashboard] 🧊 ICE gathering state:', this.peer._pc.iceGatheringState);
-            };
-        }
-
-        this.peer.on('data', (data) => {
-            console.log('[ActivityDashboard] 📦 Data received:', data);
-        });
-
-        this.peer.on('track', (track, stream) => {
-            console.log('[ActivityDashboard] 🎬 Track received!', track.kind, track.readyState);
-            console.log('[ActivityDashboard] 🎥 Stream from track:', stream);
-            const video = document.getElementById('remote-video');
-            video.srcObject = stream;
-            video.play().catch(e => console.error('[ActivityDashboard] Video play error:', e));
-        });
-
-        this.peer.on('stream', (stream) => {
-            console.log('[ActivityDashboard] ✅ Stream received! Displaying video...');
-            console.log('[ActivityDashboard] Stream details:', {
-                id: stream.id,
-                active: stream.active,
-                videoTracks: stream.getVideoTracks().length,
-                audioTracks: stream.getAudioTracks().length
-            });
-            const video = document.getElementById('remote-video');
-            video.srcObject = stream;
-            video.style.display = 'block';
-            video.play().catch(e => console.error('[ActivityDashboard] Video play error:', e));
-            $('#stream-controls').show();
-            $('#stream-status').text('🔴 Live streaming...').css('color', '#4CAF50');
-
-            frappe.show_alert({
-                message: `Now viewing ${this.currentEmployeeName}'s screen`,
-                indicator: 'green'
-            });
-        });
-
-        this.peer.on('error', (err) => {
-            console.error('[ActivityDashboard] ❌ Peer error:', err);
-            console.error('[ActivityDashboard] ❌ Error details:', err.message, err.code);
-            $('#stream-status').text('Connection error').css('color', '#F44336');
-            frappe.msgprint({
-                title: 'Connection Error',
-                message: 'Failed to establish video connection. Please try again.',
-                indicator: 'red'
-            });
-        });
-
-        this.peer.on('close', () => {
-            console.log('[ActivityDashboard] 🔌 Peer connection closed');
-            this.stopViewing();
-        });
-
-        console.log('[ActivityDashboard] 📨 Signaling offer to peer...');
-        this.peer.signal(offer);
-        console.log('[ActivityDashboard] ✅ Offer signaled');
     }
 
-    stopViewing() {
-        console.log('[ActivityDashboard] ⏹️ Stopping stream...');
+    render_top_apps(apps) {
+        if (!apps) return;
 
-        if (this.peer) {
-            this.peer.destroy();
-            this.peer = null;
-        }
+        // Chart
+        const labels = apps.map(a => a.application_id.substring(0, 15)); // Truncate
+        const values = apps.map(a => (a.total_seconds || 0) / 3600); // In Hours
 
-        if (this.currentEmployee) {
-            this.socket.emit('stop-stream', {
-                employee_id: this.currentEmployee
-            });
-        }
+        new frappe.Chart("#top-apps-chart", {
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        name: "Hours",
+                        chartType: "pie",
+                        values: values
+                    }
+                ]
+            },
+            type: 'pie',
+            height: 250,
+            colors: ['#4CAF50', '#8BC34A', '#CDDC39', '#FFEB3B', '#FFC107', '#FF9800']
+        });
 
-        const video = document.getElementById('remote-video');
-        if (video.srcObject) {
-            video.srcObject.getTracks().forEach(track => track.stop());
-            video.srcObject = null;
-        }
-        video.style.display = 'none';
+        // Table
+        const tbody = $('#top-apps-list tbody');
+        tbody.empty();
 
-        $('#stream-controls').hide();
-        $('#stream-title').text('Select an employee to view their screen');
-        $('#stream-status').text('');
+        const total = apps.reduce((sum, a) => sum + (a.total_seconds || 0), 0);
 
-        $('.employee-list-item').removeClass('active');
+        apps.forEach(app => {
+            const percentage = total > 0 ? Math.round((app.total_seconds / total) * 100) : 0;
+            const appName = app.applications || app.application_id || 'Unknown';
+            const row = `
+                <tr>
+                    <td>${appName}</td>
+                    <td class="text-right">${app.total_time}</td>
+                    <td class="text-right">${percentage}%</td>
+                </tr>
+            `;
+            tbody.append(row);
+        });
+    }
 
-        this.currentEmployee = null;
-        this.currentEmployeeName = null;
+    render_employee_activity(employees) {
+        if (!employees) return;
+
+        // Chart
+        const labels = employees.map(e => e.employee_name || e.employee);
+        const values = employees.map(e => (e.total_seconds || 0) / 3600);
+
+        new frappe.Chart("#employee-chart", {
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        name: "Hours",
+                        chartType: "bar",
+                        values: values
+                    }
+                ]
+            },
+            type: 'bar',
+            height: 250,
+            colors: ['#673AB7']
+        });
+
+        // Table
+        const tbody = $('#employee-list-stats tbody');
+        tbody.empty();
+
+        employees.forEach(emp => {
+            const row = `
+                <tr>
+                    <td>${emp.employee_name || emp.employee}</td>
+                    <td class="text-right">${emp.total_time}</td>
+                    <td class="text-right">${emp.unique_apps || 0}</td>
+                </tr>
+            `;
+            tbody.append(row);
+        });
+    }
+
+    format_seconds_to_time(totalSeconds) {
+        if (isNaN(totalSeconds) || totalSeconds === null) return "00:00:00";
+
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = Math.floor(totalSeconds % 60);
+
+        return `${this.pad(hours)}:${this.pad(minutes)}:${this.pad(seconds)}`;
+    }
+
+    pad(num) {
+        return num.toString().padStart(2, '0');
     }
 }
