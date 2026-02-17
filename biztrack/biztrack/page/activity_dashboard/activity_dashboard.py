@@ -25,12 +25,12 @@ def get_activity_summary(date=None, employee=None):
     top_apps = frappe.db.sql(f"""
         SELECT 
             application_id,
-            applications,
+            MAX(applications) as applications,
             SUM(TIME_TO_SEC(duration)) as total_seconds,
             COUNT(*) as session_count
         FROM `tabApplications Tracking`
         WHERE {conditions} AND application_id IS NOT NULL
-        GROUP BY application_id, applications
+        GROUP BY application_id
         ORDER BY total_seconds DESC
         LIMIT 10
     """, as_dict=True)
