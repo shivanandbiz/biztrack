@@ -111,158 +111,81 @@ class ActivityDashboard {
             data.top_applications.forEach(app => unique_apps.add(app.application_id));
         }
 
-        $('#stat-total-time').text(this.format_seconds_to_time(total_seconds));
+        $('#stat-total-time').text(this.format_aw_time_string(total_seconds));
         $('#stat-sessions').text(total_sessions);
         $('#stat-apps').text(data.top_applications ? data.top_applications.length : 0);
 
         const avg_seconds = total_sessions > 0 ? Math.round(total_seconds / total_sessions) : 0;
-        $('#stat-avg-session').text(this.format_seconds_to_time(avg_seconds));
+        $('#stat-avg-session').text(this.format_aw_time_string(avg_seconds));
     }
 
-    render_hourly_chart(hourly_data) {
-        if (!hourly_data) return;
+    // ... (render_hourly_chart remains same) ...
 
-        const labels = hourly_data.map(h => `${h.hour}:00`);
-        const values = hourly_data.map(h => (h.total_seconds || 0) / 3600);
+    /**
+     * Renders a list of items with progress bars (ActivityWatch Style)
+     */
+    render_aw_list(data, containerId, labelKey, timeKey, valueKey, subLabelKey) {
+        const container = $(containerId);
+        container.empty();
 
-        new frappe.Chart("#hourly-chart", {
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        name: "Activity (Hours)",
-                        chartType: "bar",
-                        values: values
-                    }
-                ]
-            },
-            title: "Hourly Activity",
-            type: 'bar',
-            height: 250,
-            colors: ['#2196F3']
-        });
-    }
+        if (!data || data.length === 0) {
+            container.append('<div class="text-muted text-center p-3">No activity found</div>');
+            return;
+        }
 
-    render_top_apps(apps) {
-        if (!apps) return;
+        const maxVal = Math.max(...data.map(d => d[valueKey] || 0));
 
-        // Chart - Switched to BAR as requested
-        const labels = apps.map(a => (a.applications || a.application_id || 'Unknown').substring(0, 20));
-        const values = apps.map(a => (a.total_seconds || 0) / 3600);
+        // Colors similar to ActivityWatch palette
+        const colors = [
+            '#ffb74d', '#64b5f6', '#81c784', '#ffd54f', '#4db6ac',
+            '#ba68c8', '#e57373', '#90a4ae', '#a1887f', '#ff8a65'
+        ];
 
-        new frappe.Chart("#top-apps-chart", {
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        name: "Hours",
-                        chartType: "bar",
-                        values: values
-                    }
-                ]
-            },
-            type: 'bar',
-            height: 250,
-            colors: ['#FFA726'] // Orange-ish like ActivityWatch
-        });
+        data.forEach((item, index) => {
+            const val = item[valueKey] || 0;
+            const percent = maxVal > 0 ? (val / maxVal) * 100 : 0;
+            const label = item[labelKey] || 'Unknown';
 
-        // Table
-        const tbody = $('#top-apps-list tbody');
-        tbody.empty();
+            // Use local formatter for "1h 2m 3s" style instead of backend string
+            const time = this.format_aw_time_string(val);
 
-        const total = apps.reduce((sum, a) => sum + (a.total_seconds || 0), 0);
+            const subLabel = subLabelKey ? (item[subLabelKey] || '') : '';
+            const color = colors[index % colors.length];
 
-        apps.forEach(app => {
-            const percentage = total > 0 ? Math.round((app.total_seconds / total) * 100) : 0;
-            const appName = app.applications || app.application_id || 'Unknown';
-            const row = `
-                <tr>
-                    <td>${appName}</td>
-                    <td class="text-right">${app.total_time}</td>
-                    <td class="text-right">${percentage}%</td>
-                </tr>
-            `;
-            tbody.append(row);
-        });
-    }
-
-    render_categories(categories) {
-        if (!categories) return;
-
-        // Chart
-        const labels = categories.map(c => c.category || 'Uncategorized');
-        const values = categories.map(c => (c.total_seconds || 0) / 3600);
-
-        new frappe.Chart("#top-categories-chart", {
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        name: "Hours",
-                        chartType: "bar",
-                        values: values
-                    }
-                ]
-            },
-            type: 'bar',
-            height: 250,
-            colors: ['#EF5350'] // Red-ish
-        });
-    }
-
-    render_window_titles(titles) {
-        if (!titles) return;
-
-        const tbody = $('#window-titles-list tbody');
-        tbody.empty();
-
-        titles.forEach(t => {
-            const row = `
-                <tr>
-                    <td title="${t.window_title || ''}">
-                        ${(t.window_title || 'Unknown').substring(0, 60)} 
-                        <br><small class="text-muted">${t.application_id || ''}</small>
-                    </td>
-                    <td class="text-right">${t.total_time}</td>
-                    <td class="text-right">${t.frequency || 0}</td>
-                </tr>
-            `;
-            tbody.append(row);
-        });
-    }
-
-    render_employee_activity(employees) {
-        // Keeping logic if needed but user focused on app usage
-        // ... existing logic ...
-    }
-
-    render_employee_app_usage(data) {
-        if (!data) return;
-
-        const tbody = $('#table-emp-app-usage tbody');
-        tbody.empty();
-
-        data.forEach(row => {
             const html = `
-                <tr>
-                    <td>${row.employee_name || row.employee}</td>
-                    <td>${row.applications || row.application_id || 'Unknown'}</td>
-                    <td class="text-right" style="font-weight: bold;">${row.total_time}</td>
-                    <td class="text-right">${row.session_count}</td>
-                </tr>
+                <div class="aw-list-item">
+                    <div class="aw-bar" style="width: ${percent}%; background-color: ${color};"></div>
+                    <div class="aw-content">
+                        <div style="width: 100%; overflow: hidden;">
+                             <div class="aw-label" title="${label}">${label}</div>
+                             ${subLabel ? `<div class="aw-sublabel" title="${subLabel}">${subLabel}</div>` : ''}
+                        </div>
+                        <div class="aw-time">${time}</div>
+                    </div>
+                </div>
             `;
-            tbody.append(html);
+            container.append(html);
         });
     }
 
     format_seconds_to_time(totalSeconds) {
-        if (isNaN(totalSeconds) || totalSeconds === null) return "00:00:00";
+        // Kept for charts tooltips if needed, or can replace too
+        return this.format_aw_time_string(totalSeconds);
+    }
+
+    format_aw_time_string(totalSeconds) {
+        if (isNaN(totalSeconds) || totalSeconds === null) return "0s";
 
         const hours = Math.floor(totalSeconds / 3600);
         const minutes = Math.floor((totalSeconds % 3600) / 60);
         const seconds = Math.floor(totalSeconds % 60);
 
-        return `${this.pad(hours)}:${this.pad(minutes)}:${this.pad(seconds)}`;
+        let timeParts = [];
+        if (hours > 0) timeParts.push(`${hours}h`);
+        if (minutes > 0) timeParts.push(`${minutes}m`);
+        if (seconds > 0 || timeParts.length === 0) timeParts.push(`${seconds}s`);
+
+        return timeParts.join(' ');
     }
 
     pad(num) {

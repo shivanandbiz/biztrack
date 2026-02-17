@@ -61,118 +61,136 @@
         </div>
     </div>
 
+    <!-- AW Style: 3 Columns for Apps, Windows, Categories -->
     <div class="row">
-        <!-- Hourly Activity Chart -->
+        <!-- Top Applications -->
+        <div class="col-md-4" style="margin-bottom: 20px;">
+            <div class="chart-container"
+                style="border: 1px solid #ebECF0; padding: 15px; border-radius: 4px; min-height: 400px;">
+                <h5>Top Applications</h5>
+                <div id="top-apps-list" class="aw-list" style="margin-top: 15px; max-height: 400px; overflow-y: auto;">
+                    <!-- AW Style List Items will be injected here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Window Titles -->
+        <div class="col-md-4" style="margin-bottom: 20px;">
+            <div class="chart-container"
+                style="border: 1px solid #ebECF0; padding: 15px; border-radius: 4px; min-height: 400px;">
+                <h5>Top Window Titles</h5>
+                <div id="window-titles-list" class="aw-list"
+                    style="margin-top: 15px; max-height: 400px; overflow-y: auto;">
+                    <!-- AW Style List Items will be injected here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Categories -->
+        <div class="col-md-4" style="margin-bottom: 20px;">
+            <div class="chart-container"
+                style="border: 1px solid #ebECF0; padding: 15px; border-radius: 4px; min-height: 400px;">
+                <h5>Top Categories</h5>
+                <div id="top-categories-list" class="aw-list"
+                    style="margin-top: 15px; max-height: 400px; overflow-y: auto;">
+                    <!-- AW Style List Items will be injected here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hourly Activity -->
+    <div class="row">
         <div class="col-md-12" style="margin-bottom: 20px;">
             <div class="chart-container" style="border: 1px solid #ebECF0; padding: 15px; border-radius: 4px;">
-                <h5>Hourly Activity</h5>
+                <!-- <h5>Hourly Activity</h5> -->
                 <div id="hourly-chart"></div>
             </div>
         </div>
     </div>
 
+    <!-- Detailed Employee App Usage -->
     <div class="row">
-        <!-- Top Applications -->
-        <div class="col-md-6" style="margin-bottom: 20px;">
+        <div class="col-md-12" style="margin-bottom: 20px;">
             <div class="chart-container" style="border: 1px solid #ebECF0; padding: 15px; border-radius: 4px;">
-                <h5>Top Applications</h5>
-                <div id="top-apps-chart"></div>
-                <div id="top-apps-list" style="margin-top: 15px;">
-                    <table class="table table-sm table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Application</th>
-                                <th class="text-right">Time</th>
-                                <th class="text-right">%</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- Employee Activity -->
-        <div class="col-md-6" style="margin-bottom: 20px;">
-            <div class="chart-container" style="border: 1px solid #ebECF0; padding: 15px; border-radius: 4px;">
-                <h5>Employee Activity</h5>
-                <div id="employee-chart"></div>
-                <div id="employee-list-stats" style="margin-top: 15px;">
-                    <table class="table table-sm table-bordered">
+                <h5>Employee Application Usage</h5>
+                <div id="employee-app-usage-list" style="margin-top: 15px; max-height: 500px; overflow-y: auto;">
+                    <table class="table table-sm table-bordered table-striped" id="table-emp-app-usage">
                         <thead>
                             <tr>
                                 <th>Employee</th>
-                                <th class="text-right">Time</th>
-                                <th class="text-right">Apps</th>
+                                <th>Application</th>
+                                <th class="text-right">Total Time</th>
+                                <th class="text-right">Sessions</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
                     </table>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <!-- Top Categories -->
-        <div class="col-md-6" style="margin-bottom: 20px;">
-            <div class="chart-container" style="border: 1px solid #ebECF0; padding: 15px; border-radius: 4px;">
-                <h5>Top Categories</h5>
-                <div id="top-categories-chart"></div>
-                <!-- <div id="top-categories-list" style="margin-top: 15px;">
-                    <table class="table table-sm table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Category</th>
-                                <th class="text-right">Time</th>
-                                <th class="text-right">%</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div> -->
-            </div>
-        </div>
-
-        <!-- Top Window Titles -->
-        <div class="col-md-6" style="margin-bottom: 20px;">
-            <div class="chart-container" style="border: 1px solid #ebECF0; padding: 15px; border-radius: 4px;">
-                <h5>Top Window Titles</h5>
-                <div id="window-titles-list" style="margin-top: 15px; max-height: 400px; overflow-y: auto;">
-                    <table class="table table-sm table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Window Title</th>
-                                <th class="text-right">Time</th>
-                                <th class="text-right">Freq</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-                <div class="row">
-                    <!-- Detailed Employee App Usage -->
-                    <div class="col-md-12" style="margin-bottom: 20px;">
-                        <div class="chart-container"
-                            style="border: 1px solid #ebECF0; padding: 15px; border-radius: 4px;">
-                            <h5>Employee Application Usage</h5>
-                            <div id="employee-app-usage-list"
-                                style="margin-top: 15px; max-height: 500px; overflow-y: auto;">
-                                <table class="table table-sm table-bordered table-striped" id="table-emp-app-usage">
-                                    <thead>
-                                        <tr>
-                                            <th>Employee</th>
-                                            <th>Application</th>
-                                            <th class="text-right">Total Time</th>
-                                            <th class="text-right">Sessions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody></tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .aw-list-item {
+        position: relative;
+        margin-bottom: 8px;
+        padding: 5px 10px;
+        border-radius: 4px;
+        background-color: #f7f7f7;
+        /* Fallback */
+        overflow: hidden;
+        border: 1px solid #e0e0e0;
+        font-size: 12px;
+        height: 45px;
+        /* Fixed height for consistency */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .aw-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        z-index: 0;
+        opacity: 0.5;
+        /* Transparent look like AW */
+        border-right: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .aw-content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+
+    .aw-label {
+        font-weight: 600;
+        color: #333;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 70%;
+    }
+
+    .aw-time {
+        font-family: monospace;
+        color: #333;
+        font-weight: 500;
+    }
+
+    .aw-sublabel {
+        font-size: 10px;
+        color: #666;
+        margin-top: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+</style>
