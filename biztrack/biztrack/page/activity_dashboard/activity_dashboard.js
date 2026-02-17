@@ -143,6 +143,40 @@ class ActivityDashboard {
         });
     }
 
+    render_top_apps(apps) {
+        // AW Style List
+        this.render_aw_list(apps, '#top-apps-list', 'applications', 'total_time', 'total_seconds', null);
+    }
+
+    render_categories(categories) {
+        // AW Style List
+        this.render_aw_list(categories, '#top-categories-list', 'category', 'total_time', 'total_seconds', null);
+    }
+
+    render_window_titles(titles) {
+        // AW Style List
+        this.render_aw_list(titles, '#window-titles-list', 'window_title', 'total_time', 'total_seconds', 'application_id');
+    }
+
+    render_employee_app_usage(data) {
+        if (!data) return;
+
+        const tbody = $('#table-emp-app-usage tbody');
+        tbody.empty();
+
+        data.forEach(row => {
+            const html = `
+                <tr>
+                    <td>${row.employee_name || row.employee}</td>
+                    <td>${row.applications || row.application_id || 'Unknown'}</td>
+                    <td class="text-right" style="font-weight: bold;">${row.total_time}</td>
+                    <td class="text-right">${row.session_count}</td>
+                </tr>
+            `;
+            tbody.append(html);
+        });
+    }
+
     /**
      * Renders a list of items with progress bars (ActivityWatch Style)
      */
