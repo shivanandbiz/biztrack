@@ -19,8 +19,9 @@ class ActivityDashboard {
     }
 
     setup_ui() {
-        // HTML is loaded automatically from activity_dashboard.html
-        // We just need to ensure the container is ready
+        // Render the HTML template into the page body
+        $(frappe.render_template('activity_dashboard', this)).appendTo(this.page.main);
+
         this.today = frappe.datetime.get_today();
         $('#date-filter').val(this.today);
     }
